@@ -4,18 +4,20 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import javax.swing.JLabel;
+
 import java.awt.Font;
 import javax.swing.JButton;
 import java.awt.GridLayout;
-import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.event.ActionListener;
+import java.sql.SQLException;
 import java.awt.event.ActionEvent;
-import java.awt.FlowLayout;
+
+import Interface.admin.*;
 
 public class Admin extends JFrame{
 	
-	public Admin(String tennv) {
+	public Admin(String tennv) throws SQLException {
 		setTitle("Admin - Quản Lý Bảo Hành");
         setSize(880, 550);
         setLocationRelativeTo(null);
@@ -37,40 +39,17 @@ public class Admin extends JFrame{
 		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 15));
 		panel.add(lblNewLabel_1);
 		
-		JButton btnNewButton = new JButton("Đăng xuất");
-		btnNewButton.setBounds(730, 11, 102, 33);
-		panel.add(btnNewButton);
+		JButton btnDX = new JButton("Đăng xuất");
+		btnDX.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Admin.this.dispose();
+				new Login().setVisible(true);
+			}
+		});
+		btnDX.setBounds(730, 11, 102, 33);
+		panel.add(btnDX);
 		
 		
-		
-		JPanel panel_1 = new JPanel();
-		panel_1.setBounds(10, 78, 163, 411);
-		getContentPane().add(panel_1);
-		panel_1.setLayout(new GridLayout(0, 1, 0, 0));
-		
-		JButton btnTrangChu = new JButton("Trang Chủ");
-		btnTrangChu.setFont(new Font("Tahoma", Font.BOLD, 15));
-		panel_1.add(btnTrangChu);
-		
-		JButton btnKhachHang = new JButton("Khách Hàng");
-		btnKhachHang.setFont(new Font("Tahoma", Font.BOLD, 15));
-		panel_1.add(btnKhachHang);
-		
-		JButton btnSanPham = new JButton("Sản Phảm");
-		btnSanPham.setFont(new Font("Tahoma", Font.BOLD, 15));
-		panel_1.add(btnSanPham);
-		
-		JButton btnNhanVien = new JButton("Nhân Viên");
-		btnNhanVien.setFont(new Font("Tahoma", Font.BOLD, 15));
-		panel_1.add(btnNhanVien);
-		
-		JButton btnBaoHanh = new JButton("Bảo Hành");
-		btnBaoHanh.setFont(new Font("Tahoma", Font.BOLD, 15));
-		panel_1.add(btnBaoHanh);
-		
-		JButton btnThongKe = new JButton("Thóng Kê");
-		btnThongKe.setFont(new Font("Tahoma", Font.BOLD, 15));
-		panel_1.add(btnThongKe);
 		
 		JPanel pnlContent = new JPanel();
 		pnlContent.setBounds(183, 78, 669, 411);
@@ -83,33 +62,16 @@ public class Admin extends JFrame{
         pnlContent.add(pnlTrangChu, "TRANGCHU");
         pnlTrangChu.setLayout(null);
         
-        JLabel lblNewLabel_2 = new JLabel("trng chu");
-        lblNewLabel_2.setBounds(243, 92, 76, 37);
-        pnlTrangChu.add(lblNewLabel_2);
         
-        JPanel pnlKhachHang = new JPanel();
+        
+        pnlKhachHang pnlKhachHang = new pnlKhachHang();
         pnlContent.add(pnlKhachHang, "KHACHHANG");
-        pnlKhachHang.setLayout(null);
         
-        JLabel lblNewLabel_3 = new JLabel("QL kh");
-        lblNewLabel_3.setBounds(207, 121, 46, 14);
-        pnlKhachHang.add(lblNewLabel_3);
-        
-        JPanel pnlSanPham = new JPanel();
+        pnlSanPham pnlSanPham = new pnlSanPham();
         pnlContent.add(pnlSanPham, "SANPHAM");
-        pnlSanPham.setLayout(null);
         
-        JLabel lblNewLabel_4 = new JLabel("QL sp");
-        lblNewLabel_4.setBounds(257, 130, 46, 14);
-        pnlSanPham.add(lblNewLabel_4);
-        
-        JPanel pnlNhanVien = new JPanel();
+        pnlNhanVien pnlNhanVien = new pnlNhanVien();
         pnlContent.add(pnlNhanVien, "NHANVIEN");
-        pnlNhanVien.setLayout(null);
-        
-        JLabel lblNewLabel_5 = new JLabel("QL nv");
-        lblNewLabel_5.setBounds(266, 120, 46, 14);
-        pnlNhanVien.add(lblNewLabel_5);
         
         JPanel pnlBaoHanh = new JPanel();
         pnlContent.add(pnlBaoHanh, "BAOHANH");
@@ -119,7 +81,7 @@ public class Admin extends JFrame{
         lblNewLabel_6.setBounds(141, 222, 46, 14);
         pnlBaoHanh.add(lblNewLabel_6);
         
-        JPanel pnlThongKe = new JPanel();
+        pnlThongKe pnlThongKe = new pnlThongKe();
         pnlContent.add(pnlThongKe, "THONGKE");
         pnlThongKe.setLayout(null);
         
@@ -129,16 +91,63 @@ public class Admin extends JFrame{
         
 
         /* ===== SỰ KIỆN MENU ===== */
-        btnTrangChu.addActionListener(e -> cardLayout.show(pnlContent, "TRANGCHU"));
-        btnKhachHang.addActionListener(e -> cardLayout.show(pnlContent, "KHACHHANG"));
-        btnSanPham.addActionListener(e -> cardLayout.show(pnlContent, "SANPHAM"));
-        btnNhanVien.addActionListener(e -> cardLayout.show(pnlContent, "NHANVIEN"));
-        btnBaoHanh.addActionListener(e -> cardLayout.show(pnlContent, "BAOHANH"));
-        btnThongKe.addActionListener(e -> cardLayout.show(pnlContent, "THONGKE"));
-        
-        
 
-        // Mặc định
-        //cardLayout.show(pnlContent, "TRANGCHU");
+        JPanel panel_1 = new JPanel();
+		panel_1.setBounds(10, 78, 163, 411);
+		getContentPane().add(panel_1);
+		panel_1.setLayout(new GridLayout(0, 1, 0, 0));
+		
+		JButton btnTrangChu = new JButton("Trang Chủ");
+		btnTrangChu.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnTrangChu.setFont(new Font("Tahoma", Font.BOLD, 15));
+		panel_1.add(btnTrangChu);
+		
+		JButton btnKhachHang = new JButton("Khách Hàng");
+		btnKhachHang.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cardLayout.show(pnlContent, "KHACHHANG");
+			}
+		});
+		btnKhachHang.setFont(new Font("Tahoma", Font.BOLD, 15));
+		panel_1.add(btnKhachHang);
+		
+		JButton btnSanPham = new JButton("Sản Phảm");
+		btnSanPham.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cardLayout.show(pnlContent, "SANPHAM");
+			}
+		});
+		btnSanPham.setFont(new Font("Tahoma", Font.BOLD, 15));
+		panel_1.add(btnSanPham);
+		
+		JButton btnNhanVien = new JButton("Nhân Viên");
+		btnNhanVien.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				cardLayout.show(pnlContent, "NHANVIEN");
+			}
+		});
+		btnNhanVien.setFont(new Font("Tahoma", Font.BOLD, 15));
+		panel_1.add(btnNhanVien);
+		
+		JButton btnBaoHanh = new JButton("Bảo Hành");
+		btnBaoHanh.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnBaoHanh.setFont(new Font("Tahoma", Font.BOLD, 15));
+		panel_1.add(btnBaoHanh);
+		
+		JButton btnThongKe = new JButton("Thống Kê");
+		btnThongKe.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		btnThongKe.setFont(new Font("Tahoma", Font.BOLD, 15));
+		panel_1.add(btnThongKe);
+            
 	}
+	
 }

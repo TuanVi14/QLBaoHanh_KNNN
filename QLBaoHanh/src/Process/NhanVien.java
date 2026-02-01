@@ -30,23 +30,31 @@ public class NhanVien {
        return cn.LoadData(sql); 
     } 
     //Truy van du lieu trong Table Sanpham theo MaSP 
-    public ResultSet ShowSPTheoma(String ma) throws SQLException{    
+    public ResultSet ShowNVTheoma(String ma) throws SQLException{    
        String sql = "SELECT MaNhanVien, TenNhanVien, TenDangNhap, L.MaVaiTro, TenVaiTro  FROM nhanvien nv, vaitro L where L.MaVaiTro=nv.MaVaiTro and MaNhanVien='" + ma +"'";         
        return cn.LoadData(sql); 
     }  
-    public ResultSet ShowSPTheoten(String ten) throws SQLException{    
+    public ResultSet ShowNVTheoten(String ten) throws SQLException{    
        String sql = "SELECT MaNhanVien, TenNhanVien, TenDangNhap, L.MaVaiTro, TenVaiTro  FROM nhanvien nv, vaitro L where L.MaVaiTro=nv.MaVaiTro and TenNhanVien like '%" + ten + "%'";         
        return cn.LoadData(sql); 
     } 
     //Theo moi 1 dong du lieu vao table Sanpham 
-    public void InsertNhanVien(String ma, String ten, String tendn, String vt)  throws SQLException{    
-       String sql = "INSERT INTO nhanvien values('" + ma +"',N'" + ten +"'," + tendn + ",'" + vt + "')";
-       cn.UpdateData(sql); 
-    } 
+    public void InsertNhanVien(int ma, String ten, String tendn, String mkh, int vt) throws SQLException {
+        String sql =
+            "INSERT INTO nhanvien (MaNhanVien, TenNhanVien, TenDangNhap, MatKhauHash, MaVaiTro) " +
+            "VALUES (" + ma + ", '" + ten + "', '" + tendn + "', '" + mkh + "', " + vt + ")";
+
+        cn.UpdateData(sql);
+    }
+
     //Dieu chinh 1 dong du lieu vao table Sanpham 
-    public void EditNhanVien(String ma, String ten, String vt)  throws SQLException{    
-       String sql = "Update nhanvien set TenNhanVien=N'" + ten +",MaVaiTro='" + vt +"'  where MaNhanVien='" + ma +"'";         
-       cn.UpdateData(sql); 
+    public void EditNhanVien(int ma, String ten, int vt) throws SQLException {    
+        String sql =
+            "UPDATE nhanvien " +
+            "SET TenNhanVien='" + ten + "', MaVaiTro=" + vt +
+            " WHERE MaNhanVien=" + ma;
+
+        cn.UpdateData(sql);
     } 
     //Xoa 1 dong du lieu vao table Sanpham 
     public void DeleteNhanVien(String ma) throws SQLException{    
