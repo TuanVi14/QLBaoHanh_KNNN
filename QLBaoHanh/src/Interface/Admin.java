@@ -58,7 +58,7 @@ public class Admin extends JFrame{
 		getContentPane().add(pnlContent);
 		
 		/* ===== CÁC PANEL CON ===== */
-		JPanel pnlTrangChu = new JPanel();
+		pnlTrangChu pnlTrangChu = new pnlTrangChu();
         pnlContent.add(pnlTrangChu, "TRANGCHU");
         pnlTrangChu.setLayout(null);
         
@@ -73,13 +73,9 @@ public class Admin extends JFrame{
         pnlNhanVien pnlNhanVien = new pnlNhanVien();
         pnlContent.add(pnlNhanVien, "NHANVIEN");
         
-        JPanel pnlBaoHanh = new JPanel();
+        pnlBaoHanh pnlBaoHanh = new pnlBaoHanh();
         pnlContent.add(pnlBaoHanh, "BAOHANH");
-        pnlBaoHanh.setLayout(null);
-        
-        JLabel lblNewLabel_6 = new JLabel("QL bh");
-        lblNewLabel_6.setBounds(141, 222, 46, 14);
-        pnlBaoHanh.add(lblNewLabel_6);
+
         
         pnlThongKe pnlThongKe = new pnlThongKe();
         pnlContent.add(pnlThongKe, "THONGKE");
@@ -100,6 +96,7 @@ public class Admin extends JFrame{
 		JButton btnTrangChu = new JButton("Trang Chủ");
 		btnTrangChu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				cardLayout.show(pnlContent, "TRANGCHU");
 			}
 		});
 		btnTrangChu.setFont(new Font("Tahoma", Font.BOLD, 15));
@@ -135,6 +132,7 @@ public class Admin extends JFrame{
 		JButton btnBaoHanh = new JButton("Bảo Hành");
 		btnBaoHanh.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				cardLayout.show(pnlContent, "BAOHANH");
 			}
 		});
 		btnBaoHanh.setFont(new Font("Tahoma", Font.BOLD, 15));
@@ -143,6 +141,7 @@ public class Admin extends JFrame{
 		JButton btnThongKe = new JButton("Thống Kê");
 		btnThongKe.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				cardLayout.show(pnlContent, "THONGKE");
 			}
 		});
 		btnThongKe.setFont(new Font("Tahoma", Font.BOLD, 15));

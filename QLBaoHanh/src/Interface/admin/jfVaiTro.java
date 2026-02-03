@@ -1,6 +1,6 @@
 package Interface.admin;
 
-import javax.swing.JPanel;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
@@ -14,52 +14,43 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
 import Interface.Admin;
-import Process.*;
+import Process.VaiTro;
 
 import javax.swing.JButton;
-import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 
-public class pnlLoaiSP extends JFrame {
-
-	private static final long serialVersionUID = 1L;
+public class jfVaiTro extends JFrame{
+	
 	private JTextField txtTimKiem;
-	private JTextField txtML;
-	private JTextField txtTL;
+	private JTextField txtMaVaiTro;
+	private JTextField txtTenVaiTro;
 	private JTable table;
 	
-	private final LoaiSP ls = new LoaiSP();
+	private final VaiTro vt = new VaiTro();
 	private final DefaultTableModel tableModel = new DefaultTableModel();
 	private boolean cothem=true;
 	
 	private JButton btnThem, btnXoa,btnSua,btnLuu,btnKluu;
-	/**
-	 * Create the panel.
-	 */
-	public pnlLoaiSP() {
-		setTitle(" Quản Lý Loại Sản Phẩm");
-        setSize(669, 411);
-        setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        getContentPane().setLayout(null);
+	
+	public jfVaiTro() throws SQLException {
+		setTitle("Quản Lý Tai Trò");
+		getContentPane().setLayout(null);
 		
-		JLabel lblNewLabel = new JLabel("Tên Loại SP:");
+		JLabel lblNewLabel = new JLabel("Tên Vai Trò:");
 		lblNewLabel.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblNewLabel.setBounds(56, 24, 73, 14);
+		lblNewLabel.setBounds(43, 37, 73, 14);
 		getContentPane().add(lblNewLabel);
 		
 		txtTimKiem = new JTextField();
-		txtTimKiem.setBounds(152, 22, 356, 20);
+		txtTimKiem.setBounds(132, 35, 270, 20);
 		getContentPane().add(txtTimKiem);
 		txtTimKiem.setColumns(10);
 		
-		JButton btnSearch = new JButton("Tìm Kiếm");
-		btnSearch.addActionListener(new ActionListener() {
+		JButton btnTimKiem = new JButton("Tìm Kiếm");
+		btnTimKiem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				String tsp = txtTimKiem.getText().toString();
 				try {
@@ -70,28 +61,29 @@ public class pnlLoaiSP extends JFrame {
 				}
 			}
 		});
-		btnSearch.setBounds(518, 21, 89, 23);
-		getContentPane().add(btnSearch);
+		btnTimKiem.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		btnTimKiem.setBounds(412, 33, 96, 23);
+		getContentPane().add(btnTimKiem);
 		
-		JLabel lblNewLabel_1 = new JLabel("Mã Loại:");
+		JLabel lblNewLabel_1 = new JLabel("Mã Vai Trò:");
 		lblNewLabel_1.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblNewLabel_1.setBounds(56, 75, 49, 14);
+		lblNewLabel_1.setBounds(48, 82, 68, 14);
 		getContentPane().add(lblNewLabel_1);
 		
-		txtML = new JTextField();
-		txtML.setBounds(152, 73, 135, 20);
-		getContentPane().add(txtML);
-		txtML.setColumns(10);
+		txtMaVaiTro = new JTextField();
+		txtMaVaiTro.setBounds(132, 79, 126, 20);
+		getContentPane().add(txtMaVaiTro);
+		txtMaVaiTro.setColumns(10);
 		
-		JLabel lblNewLabel_2 = new JLabel("Tên Loại:");
+		JLabel lblNewLabel_2 = new JLabel("Tên Vai trò:");
 		lblNewLabel_2.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		lblNewLabel_2.setBounds(327, 75, 59, 14);
+		lblNewLabel_2.setBounds(291, 82, 73, 14);
 		getContentPane().add(lblNewLabel_2);
 		
-		txtTL = new JTextField();
-		txtTL.setBounds(396, 73, 191, 20);
-		getContentPane().add(txtTL);
-		txtTL.setColumns(10);
+		txtTenVaiTro = new JTextField();
+		txtTenVaiTro.setBounds(389, 80, 156, 20);
+		getContentPane().add(txtTenVaiTro);
+		txtTenVaiTro.setColumns(10);
 		
 		btnThem = new JButton("Thêm");
 		btnThem.addActionListener(new ActionListener() {
@@ -101,13 +93,13 @@ public class pnlLoaiSP extends JFrame {
 			}
 		});
 		btnThem.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		btnThem.setBounds(56, 122, 89, 23);
+		btnThem.setBounds(10, 126, 89, 23);
 		getContentPane().add(btnThem);
 		
 		btnSua = new JButton("Sửa");
 		btnSua.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String ml=txtML.getText(); 
+				String ml=txtMaVaiTro.getText(); 
 		        if(ml.length()==0) //Chua chon Ma loai              
 		                JOptionPane.showMessageDialog(null,"Vui long chon loi can sua", "Thong bao",1); 
 		        else 
@@ -118,13 +110,13 @@ public class pnlLoaiSP extends JFrame {
 			}
 		});
 		btnSua.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		btnSua.setBounds(169, 122, 89, 23);
+		btnSua.setBounds(109, 126, 89, 23);
 		getContentPane().add(btnSua);
 		
 		btnXoa = new JButton("Xóa");
 		btnXoa.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String ma=txtML.getText(); 
+				String ma=txtMaVaiTro.getText(); 
 		        try { 
 		            if(ma.length()==0)              
 		                JOptionPane.showMessageDialog(null,"Can chon 1 loại SP de xoa","Thong bao",1); 
@@ -133,7 +125,7 @@ public class pnlLoaiSP extends JFrame {
 		                if(JOptionPane.showConfirmDialog(null, "Ban muon xoa loại sp " + ma +  
 		" này hay khong?","Thong bao",2)==0) 
 		                {     
-		                    ls.DeleteLoaiSP(ma);//goi ham xoa du lieu theo ma loai 
+		                    vt.DeleteVaiTro(ma);;//goi ham xoa du lieu theo ma loai 
 		                    ClearData();//Xoa du lieu trong tableModel 
 		                    ShowData();//Do du lieu vao table Model 
 		                    setNull();//Xoa trang Textfield 
@@ -141,29 +133,29 @@ public class pnlLoaiSP extends JFrame {
 		             } 
 		        }  
 		        catch (SQLException ex) { 
-		            Logger.getLogger(pnlLoaiSP.class.getName()).log(Level.SEVERE, null, ex);
+		            Logger.getLogger(jfVaiTro.class.getName()).log(Level.SEVERE, null, ex);
 		        }
 			}
 		});
 		btnXoa.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		btnXoa.setBounds(282, 122, 89, 23);
+		btnXoa.setBounds(208, 126, 89, 23);
 		getContentPane().add(btnXoa);
 		
 		btnLuu = new JButton("Lưu");
 		btnLuu.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int ma = Integer.parseInt(txtML.getText()); 
-		        String ten=txtTL.getText(); 
+				int ma = Integer.parseInt(txtMaVaiTro.getText()); 
+		        String ten=txtTenVaiTro.getText(); 
 		         
 		         if(ma==0 || ten.length()==0)              
-		                JOptionPane.showMessageDialog(null,"Vui long nhap Ma NV va ten nv", "Thong bao",1); 
+		                JOptionPane.showMessageDialog(null,"Vui long nhap Ma vt va ten vt", "Thong bao",1); 
 		         else
 		              try { 
 		                if(cothem==true) {   //Luu cho tthem moi    
-		                    ls.InsertLoaiSP(ma, ten); 
+		                    vt.InsertVaiTro(ma, ten); 
 		                }
 		                else                //Luu cho sua 
-		                    ls.EditLoaiSP(ma, ten); 
+		                    vt.EditVaiTro(ma, ten); 
 		                ClearData(); //goi ham xoa du lieu tron tableModel 
 		                ShowData(); //Do lai du lieu vao Table Model 
 		              } 
@@ -175,7 +167,7 @@ public class pnlLoaiSP extends JFrame {
 			}
 		});
 		btnLuu.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		btnLuu.setBounds(396, 122, 89, 23);
+		btnLuu.setBounds(307, 126, 89, 23);
 		getContentPane().add(btnLuu);
 		
 		btnKluu = new JButton("K.Lưu");
@@ -186,44 +178,44 @@ public class pnlLoaiSP extends JFrame {
 			}
 		});
 		btnKluu.setFont(new Font("Tahoma", Font.PLAIN, 13));
-		btnKluu.setBounds(507, 122, 89, 23);
+		btnKluu.setBounds(412, 126, 89, 23);
 		getContentPane().add(btnKluu);
 		
 		JScrollPane scrollPane = new JScrollPane();
-		scrollPane.setBounds(127, 162, 420, 199);
+		scrollPane.setBounds(130, 179, 342, 214);
 		getContentPane().add(scrollPane);
 		
 		table = new JTable();
-		table.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				//Hien thi du lieu len cac JTextField khi Click chuot vao JTable 
-		        try{ 
-		            //Lay chi so dong dang chon 
-		            int row =table.getSelectedRow(); 
-		            String ma=(table.getModel().getValueAt(row,0)).toString(); 
-		            ResultSet rs= ls.ShowLoaiSP(ma);//Goi ham lay du lieu theo ma loai 
-		            if(rs.next())//Neu co du lieu 
-		            { 
-		             txtML.setText(rs.getString("MaLoai")); 
-		             txtTL.setText(rs.getString("TenLoai")); 
-		            } 
-		        }
-		        catch (SQLException e1) { 
-		        }
-			}
-		});
 		scrollPane.setViewportView(table);
 		String []colsName = {"Mã Loại", "Tên Loại"}; 
         // đặt tiêu đề cột cho tableModel 
         tableModel.setColumnIdentifiers(colsName);   
         // kết nối jtable với tableModel   
         table.setModel(tableModel);
+		
+		JButton btnLamMoi = new JButton("Làm Mới");
+		btnLamMoi.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					ShowData();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		});
+		btnLamMoi.setFont(new Font("Tahoma", Font.PLAIN, 13));
+		btnLamMoi.setBounds(511, 127, 96, 23);
+		getContentPane().add(btnLamMoi);
+		
+		setNull();
+		setKhoa(true);
+		ShowData();
 	}
 	/* ===== HÀM XỬ LÝ SỰ KIỆN ===== */
 	private void setKhoa(boolean a) {
-		txtML.setEnabled(!a);
-		txtTL.setEnabled(!a);
+		txtMaVaiTro.setEnabled(!a);
+		txtTenVaiTro.setEnabled(!a);
 		btnLuu.setEnabled(!a);
 		btnKluu.setEnabled(!a);
 		btnThem.setEnabled(a);
@@ -232,8 +224,8 @@ public class pnlLoaiSP extends JFrame {
 	}
 	
 	private void setNull() {
-		txtML.setText(null);
-		txtTL.setText(null);
+		txtMaVaiTro.setText(null);
+		txtTenVaiTro.setText(null);
 	}
 	
 	//Ham xoa du lieu trong tableModel 
@@ -246,7 +238,7 @@ public class pnlLoaiSP extends JFrame {
     
     public final void ShowData() throws SQLException {         
         ResultSet result=null;           
-        result = ls.ShowLoaiSP(); 
+        result = vt.ShowVaiTro(); 
         try {   
             ClearData(); 
             while(result.next()){  
@@ -262,7 +254,7 @@ public class pnlLoaiSP extends JFrame {
     
     public final void ShowData(String ml) throws SQLException {         
 		ResultSet result=null;           
-		result = ls.ShowLoaiTheoten(ml);
+		result = vt.ShowVTTheoten(ml);
 		try {   
 			ClearData(); 
 			while(result.next()){  
