@@ -1,6 +1,6 @@
-package com.quanlybaohanh.bus;
+package Process;
 
-import com.quanlybaohanh.dao.PhieuBaoHanhDAO;
+import Database.PhieuBaoHanhDAO;
 import java.util.List;
 
 public class ThongKeBUS {

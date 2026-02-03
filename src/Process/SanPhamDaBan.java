@@ -1,4 +1,4 @@
-package com.quanlybaohanh.dto;
+package Process;
 
 public class SanPhamDaBan {
 

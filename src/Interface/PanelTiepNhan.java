@@ -1,8 +1,8 @@
-package com.quanlybaohanh.gui.baohanh;
+package Interface;
 
-import com.quanlybaohanh.bus.NghiepVuBaoHanhBUS;
-import com.quanlybaohanh.dto.PhieuBaoHanh;
-import com.quanlybaohanh.dto.ThongTinBaoHanh;
+import Process.NghiepVuBaoHanhBUS;
+import Process.PhieuBaoHanh;
+import Process.ThongTinBaoHanh;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -54,7 +54,7 @@ public class PanelTiepNhan extends JPanel {
         btnKiemTra = new JButton("Kiểm tra bảo hành");
         btnKiemTra.setFont(new Font("Arial", Font.BOLD, 12));
         btnKiemTra.setBackground(new Color(70, 130, 180)); // Màu xanh SteelBlue
-        btnKiemTra.setForeground(Color.WHITE);
+        btnKiemTra.setForeground(Color.BLACK);
 
         pnlTimKiem.add(lblSerial);
         pnlTimKiem.add(txtSerial);
@@ -117,7 +117,7 @@ public class PanelTiepNhan extends JPanel {
         btnTaoPhieu = new JButton("TẠO PHIẾU TIẾP NHẬN");
         btnTaoPhieu.setFont(new Font("Arial", Font.BOLD, 16));
         btnTaoPhieu.setBackground(new Color(34, 139, 34)); // Màu xanh lá ForestGreen
-        btnTaoPhieu.setForeground(Color.WHITE);
+        btnTaoPhieu.setForeground(Color.BLACK);
         btnTaoPhieu.setEnabled(false); // Chưa check thì chưa được tạo phiếu
 
         pnlTaoPhieu.add(pnlInputLoi, BorderLayout.CENTER);

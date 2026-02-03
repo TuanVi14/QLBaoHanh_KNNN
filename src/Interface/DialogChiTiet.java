@@ -1,8 +1,8 @@
-package com.quanlybaohanh.gui.baohanh;
+package Interface;
 
-import com.quanlybaohanh.bus.NghiepVuBaoHanhBUS;
-import com.quanlybaohanh.dto.LichSuXuLy;
-import com.quanlybaohanh.util.DinhDang;
+import Process.NghiepVuBaoHanhBUS;
+import Process.LichSuXuLy;
+import Process.DinhDang;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

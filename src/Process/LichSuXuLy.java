@@ -1,4 +1,4 @@
-package com.quanlybaohanh.dto;
+package Process;
 
 import java.sql.Date;
 

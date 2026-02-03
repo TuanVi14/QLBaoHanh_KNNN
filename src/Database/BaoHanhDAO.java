@@ -1,6 +1,6 @@
-package com.quanlybaohanh.dao;
+package Database;
 
-import com.quanlybaohanh.dto.ThongTinBaoHanh;
+import Process.ThongTinBaoHanh;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

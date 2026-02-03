@@ -1,7 +1,7 @@
-package com.quanlybaohanh.gui.baohanh;
+package Interface;
 
-import com.quanlybaohanh.bus.NghiepVuBaoHanhBUS;
-import com.quanlybaohanh.dto.LichSuXuLy;
+import Process.NghiepVuBaoHanhBUS;
+import Process.LichSuXuLy;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,7 +14,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import com.quanlybaohanh.gui.baohanh.DialogChiTiet;
+import Interface.DialogChiTiet;
 
 public class PanelXuLy extends JPanel {
 
@@ -120,7 +120,7 @@ public class PanelXuLy extends JPanel {
         JPanel pnlButton = new JPanel(new FlowLayout());
         btnCapNhat = new JButton("Cập Nhật");
         btnCapNhat.setBackground(new Color(30, 144, 255)); // DodgerBlue
-        btnCapNhat.setForeground(Color.WHITE);
+        btnCapNhat.setForeground(Color.BLACK);
         
         btnXemLichSu = new JButton("Xem Lịch Sử");
         

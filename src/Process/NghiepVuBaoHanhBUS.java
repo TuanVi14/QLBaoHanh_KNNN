@@ -1,11 +1,11 @@
-package com.quanlybaohanh.bus;
+package Process;
 
-import com.quanlybaohanh.dao.BaoHanhDAO;
-import com.quanlybaohanh.dao.LichSuXuLyDAO;
-import com.quanlybaohanh.dao.PhieuBaoHanhDAO;
-import com.quanlybaohanh.dto.LichSuXuLy;
-import com.quanlybaohanh.dto.PhieuBaoHanh;
-import com.quanlybaohanh.dto.ThongTinBaoHanh;
+import Database.BaoHanhDAO;
+import Database.LichSuXuLyDAO;
+import Database.PhieuBaoHanhDAO;
+import Process.LichSuXuLy;
+import Process.PhieuBaoHanh;
+import Process.ThongTinBaoHanh;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;

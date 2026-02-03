@@ -1,4 +1,4 @@
-package com.quanlybaohanh.dao;
+package Database;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

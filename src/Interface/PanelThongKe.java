@@ -1,6 +1,6 @@
-package com.quanlybaohanh.gui.baohanh;
+package Interface;
 
-import com.quanlybaohanh.bus.ThongKeBUS;
+import Process.ThongKeBUS;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -66,12 +66,12 @@ public class PanelThongKe extends JPanel {
 
         JLabel lblHeader = new JLabel(title, SwingConstants.CENTER);
         lblHeader.setFont(new Font("Arial", Font.BOLD, 20));
-        lblHeader.setForeground(Color.WHITE);
+        lblHeader.setForeground(Color.BLACK);
         lblHeader.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         JLabel lblValue = new JLabel("0", SwingConstants.CENTER);
         lblValue.setFont(new Font("Arial", Font.BOLD, 80));
-        lblValue.setForeground(Color.WHITE);
+        lblValue.setForeground(Color.BLACK);
 
         panel.add(lblHeader, BorderLayout.NORTH);
         panel.add(lblValue, BorderLayout.CENTER);

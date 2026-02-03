@@ -1,8 +1,8 @@
-package com.quanlybaohanh.gui.chung;
+package Interface;
 
-import com.quanlybaohanh.gui.baohanh.PanelTiepNhan;
-import com.quanlybaohanh.gui.baohanh.PanelThongKe;
-import com.quanlybaohanh.gui.baohanh.PanelXuLy;
+import Interface.PanelTiepNhan;
+import Interface.PanelThongKe;
+import Interface.PanelXuLy;
 import java.awt.*;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -26,7 +26,7 @@ public class MainFrame extends JFrame {
     }
 
     private void khoiTaoGiaoDien() {
-        setTitle("HỆ THỐNG QUẢN LÝ BẢO HÀNH - NHÓM XX");
+        setTitle("HỆ THỐNG QUẢN LÝ BẢO HÀNH");
         setSize(1200, 750); // Kích thước chuẩn cho màn hình Laptop
         setLocationRelativeTo(null); // Ra giữa màn hình
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
