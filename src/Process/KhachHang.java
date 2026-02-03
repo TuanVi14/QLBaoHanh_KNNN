@@ -1,31 +1,39 @@
 package Process;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import Database.DBConnect;
+
 public class KhachHang {
-    private int maKhachHang;
-    private String tenKhachHang;
-    private String soDienThoai;
-    private String diaChi;
+    public DBConnect cn = new DBConnect();
 
-    public KhachHang() {
+    public ResultSet ShowKhachHang() throws SQLException {
+        return cn.LoadData("SELECT * FROM khachhang");
     }
 
-    public KhachHang(int maKhachHang, String tenKhachHang, String soDienThoai, String diaChi) {
-        this.maKhachHang = maKhachHang;
-        this.tenKhachHang = tenKhachHang;
-        this.soDienThoai = soDienThoai;
-        this.diaChi = diaChi;
+    public ResultSet ShowKHTheoma(String ma) throws SQLException {
+        return cn.LoadData("SELECT * FROM khachhang WHERE MaKhachHang='" + ma + "'");
     }
 
-    // Getters và Setters
-    public int getMaKhachHang() { return maKhachHang; }
-    public void setMaKhachHang(int maKhachHang) { this.maKhachHang = maKhachHang; }
+    public ResultSet ShowSPTheoten(String ten) throws SQLException {
+        return cn.LoadData("SELECT * FROM khachhang WHERE TenKhachHang LIKE N'%" + ten + "%'");
+    }
 
-    public String getTenKhachHang() { return tenKhachHang; }
-    public void setTenKhachHang(String tenKhachHang) { this.tenKhachHang = tenKhachHang; }
+    public void InsertKhachHang(int ma, String ten, String sdt, String dc) throws SQLException {
+        String sql = "INSERT INTO khachhang (MaKhachHang, TenKhachHang, SoDienThoai, DiaChi) " +
+                     "VALUES (" + ma + ", N'" + ten + "', '" + sdt + "', N'" + dc + "')";
+        cn.UpdateData(sql);
+    }
 
-    public String getSoDienThoai() { return soDienThoai; }
-    public void setSoDienThoai(String soDienThoai) { this.soDienThoai = soDienThoai; }
+    // Đã sửa tham số dc từ int -> String
+    public void EditKhachHang(int ma, String ten, String sdt, String dc) throws SQLException {
+        String sql = "UPDATE khachhang SET TenKhachHang = N'" + ten + "', " +
+                     "SoDienThoai = '" + sdt + "', DiaChi = N'" + dc + "' " +
+                     "WHERE MaKhachHang = " + ma;
+        cn.UpdateData(sql);
+    }
 
-    public String getDiaChi() { return diaChi; }
-    public void setDiaChi(String diaChi) { this.diaChi = diaChi; }
+    public void DeleteKhachHang(String ma) throws SQLException {
+        cn.UpdateData("DELETE FROM khachhang WHERE MaKhachHang='" + ma + "'");
+    }
 }

@@ -14,7 +14,8 @@ public class BaoHanhDAO {
      */
     public ThongTinBaoHanh traCuuBaoHanh(String serialInput) {
         ThongTinBaoHanh info = null;
-        Connection conn = KetNoiCSDL.getConnection();
+        DBConnect db = new DBConnect();
+        Connection conn = db.getConnection();
         
         String sql = "SELECT sp.MaSPDaBan, sp.SerialNumber, md.TenSanPham, " +
                      "       kh.TenKhachHang, kh.SoDienThoai, hd.NgayLap, md.ThoiHanBaoHanh " +
@@ -42,23 +43,8 @@ public class BaoHanhDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
-            KetNoiCSDL.closeConnection(conn);
+            db.close();
         }
         return info;
     }
- // Ví dụ test file BaoHanhDAO
-  /*  public static void main(String[] args) {
-        BaoHanhDAO dao = new BaoHanhDAO();
-        // Thử nhập mã Serial có trong DB (ví dụ: DEL123456)
-        ThongTinBaoHanh info = dao.traCuuBaoHanh("DEL123456");
-        
-        if(info != null) {
-            System.out.println("Tìm thấy máy: " + info.getTenSanPham());
-            System.out.println("Khách hàng: " + info.getTenKhachHang());
-            System.out.println("Hạn bảo hành: " + info.getThoiHanBaoHanh() + " tháng");
-        } else {
-            System.out.println("Không tìm thấy Serial này!");
-        }
-    }
-    */
 }

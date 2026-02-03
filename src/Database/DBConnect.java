@@ -8,7 +8,7 @@ import java.sql.Statement;
 
 public class DBConnect {
 	private Connection conn;
-
+	// Constructor: Tự động mở kết nối khi khởi tạo đối tượng
     public DBConnect() {
         try {
             connectSQL();
@@ -30,7 +30,9 @@ public class DBConnect {
             throw new SQLException("Khong tim thay Driver MySQL");
         }
     }
-
+    public Connection getConnection() {
+        return conn;
+    }
     // Truy vấn SELECT
     public ResultSet LoadData(String sql) {
         try {

@@ -1,102 +1,263 @@
 package Interface;
 
-import Interface.PanelTiepNhan;
-import Interface.PanelThongKe;
-import Interface.PanelXuLy;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
+import javax.swing.border.MatteBorder;
+
+// Import các Panel Admin
+import Interface.admin.pnlNhanVien;
+import Interface.admin.pnlSanPham;
+import Interface.admin.pnlKhachHang;
+import Interface.admin.pnlBaoHanh; // Tra cứu danh sách
+import Interface.admin.pnlThongKe; // Thống kê báo cáo (Admin)
+
+// Import các Panel Nghiệp vụ
+import Interface.PanelTiepNhan;
+import Interface.PanelXuLy;
+import Interface.PanelThongKe; // Thống kê cá nhân (Kỹ thuật)
 
 public class MainFrame extends JFrame {
 
-    private JTabbedPane tabbedPane;
-    
-    // Khai báo các Panel thuộc Nhiệm vụ 2 (Của bạn)
-    private PanelTiepNhan tabTiepNhan;
-    private PanelXuLy tabXuLy;
-    private PanelThongKe tabThongKe;
-    
-    // Sau này bạn kia làm xong Admin thì khai báo thêm ở đây
-    // private PanelQuanLyNhanVien tabNhanVien;
-    // private PanelQuanLySanPham tabSanPham;
+    private String tenNhanVien;
+    private String maVaiTro; 
+    private int maNhanVien;
 
-    public MainFrame() {
+    // Khai báo các nút menu
+    private JButton btnKhachHang, btnSanPham, btnNhanVien, btnXuLyBaoHanh, btnTraCuu, btnTiepNhan, btnThongKeAdmin;
+    
+    private JPanel pnlContent;
+    private CardLayout cardLayout;
+
+    private JTabbedPane tabBaoHanhTask2;
+    private PanelXuLy tabXuLy;
+    
+    // Màu sắc giao diện
+    private Color colorMenuBackground = new Color(44, 62, 80); 
+    private Color colorMenuItem = new Color(44, 62, 80);       
+    private Color colorMenuHover = new Color(52, 73, 94);      
+    private Color colorText = new Color(220, 220, 220); 
+    private Color colorHeaderBg = new Color(240, 240, 240);
+
+    public MainFrame(String tenNV, String role, int maNV) {
+        this.tenNhanVien = tenNV;
+        this.maVaiTro = role;
+        this.maNhanVien = maNV;
+        
         khoiTaoGiaoDien();
+        phanQuyen();
     }
 
     private void khoiTaoGiaoDien() {
-        setTitle("HỆ THỐNG QUẢN LÝ BẢO HÀNH");
-        setSize(1200, 750); // Kích thước chuẩn cho màn hình Laptop
-        setLocationRelativeTo(null); // Ra giữa màn hình
+        setTitle("HỆ THỐNG QUẢN LÝ - " + tenNhanVien.toUpperCase());
+        setSize(1280, 750);
+        setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLayout(new BorderLayout());
+
+        // --- 1. HEADER ---
+        JPanel pnlHeader = new JPanel(new BorderLayout());
+        pnlHeader.setBackground(colorHeaderBg);
+        pnlHeader.setPreferredSize(new Dimension(1200, 50));
+        pnlHeader.setBorder(new MatteBorder(0, 0, 2, 0, new Color(200, 200, 200)));
         
-        // 1. Khởi tạo các Panel con
-        tabTiepNhan = new PanelTiepNhan();
-        tabXuLy = new PanelXuLy();
-        tabThongKe = new PanelThongKe();
-
-        // 2. Tạo TabbedPane (Thanh chứa các Tab)
-        tabbedPane = new JTabbedPane();
-        tabbedPane.setFont(new Font("Arial", Font.BOLD, 14));
+        JLabel lblTitle = new JLabel("  PHẦN MỀM QUẢN LÝ BẢO HÀNH");
+        lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitle.setForeground(new Color(44, 62, 80));
         
-        // --- Thêm các Tab của bạn vào ---
-        // Icon để null, nếu muốn đẹp bạn có thể thêm ImageIcon vào
-        tabbedPane.addTab("Tiếp Nhận Bảo Hành", null, tabTiepNhan, "Tra cứu và nhận máy");
-        tabbedPane.addTab("Xử Lý Kỹ Thuật", null, tabXuLy, "Cập nhật tiến độ sửa chữa");
-        tabbedPane.addTab("Thống Kê & Báo Cáo", null, tabThongKe, "Dashboard tổng quan");
-
-        // --- Chỗ này để dành cho bạn làm Admin (Nhiệm vụ 1) ---
-        // tabbedPane.addTab("Quản Trị Hệ Thống", null, new JPanel(), "Chức năng Admin");
-
-        // 3. Xử lý sự kiện chuyển Tab (Quan trọng)
-        // Khi bấm sang tab khác thì dữ liệu phải tự động load lại mới nhất
-        tabbedPane.addChangeListener(new ChangeListener() {
-            @Override
-            public void stateChanged(ChangeEvent e) {
-                int index = tabbedPane.getSelectedIndex();
-                
-                switch (index) {
-                    case 0: // Tab Tiếp nhận
-                        // Có thể reset form nếu muốn
-                        break;
-                    case 1: // Tab Xử lý
-                        // Khi click vào đây, bảng danh sách phải load lại ngay
-                        // để thấy được phiếu vừa tạo bên tab Tiếp nhận
-                        tabXuLy.taiDuLieuLenBang();
-                        break;
-                    case 2: // Tab Thống kê
-                        // Load lại số liệu mới nhất
-                        tabThongKe.taiDuLieu();
-                        break;
-                }
+        JButton btnLogout = new JButton("Đăng xuất");
+        btnLogout.setBackground(new Color(231, 76, 60)); 
+        btnLogout.setForeground(new Color(254, 254, 254)); 
+        btnLogout.setFocusPainted(false);
+        btnLogout.setBorderPainted(false);
+        
+        btnLogout.addActionListener(e -> {
+            int confirm = JOptionPane.showConfirmDialog(this, "Bạn có chắc muốn đăng xuất?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                this.dispose();
+                new Login().setVisible(true);
             }
         });
-
-        // 4. Thêm vào JFrame
-        this.setLayout(new BorderLayout());
-        this.add(tabbedPane, BorderLayout.CENTER);
         
-        // Footer (Tuỳ chọn)
-        JLabel lblFooter = new JLabel("Hệ thống quản lý bảo hành v1.0 | Connected to MySQL", SwingConstants.CENTER);
-        lblFooter.setBorder(BorderFactory.createEmptyBorder(5,0,5,0));
-        this.add(lblFooter, BorderLayout.SOUTH);
-    }
+        JPanel pnlUser = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        pnlUser.setOpaque(false);
+        JLabel lblUser = new JLabel("Xin chào: " + tenNhanVien + "  ");
+        lblUser.setForeground(new Color(50, 50, 50));
+        
+        pnlUser.add(lblUser);
+        pnlUser.add(btnLogout);
+        pnlHeader.add(lblTitle, BorderLayout.WEST);
+        pnlHeader.add(pnlUser, BorderLayout.EAST);
+        add(pnlHeader, BorderLayout.NORTH);
 
-    // Hàm main để chạy chương trình
-    public static void main(String[] args) {
-        // Set giao diện cho giống Windows (nhìn đẹp hơn mặc định của Java)
+        // --- 2. SIDEBAR MENU ---
+        JPanel pnlSidebar = new JPanel(new BorderLayout());
+        pnlSidebar.setBackground(colorMenuBackground);
+        pnlSidebar.setPreferredSize(new Dimension(230, 0));
+        
+        JPanel pnlMenuContainer = new JPanel(new GridBagLayout()); 
+        pnlMenuContainer.setBackground(colorMenuBackground);
+        pnlMenuContainer.setOpaque(false);
+        
+        // Cấu hình GridBag để nút neo lên trên
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = GridBagConstraints.RELATIVE;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.NORTH; 
+        gbc.weightx = 1.0;
+        gbc.insets = new Insets(0, 0, 5, 0); 
+        
+        // --- KHỞI TẠO CÁC NÚT MENU ---
+        btnTraCuu = createMenuItem("TRA CỨU DANH SÁCH", "TRACUU_BH"); 
+        btnTiepNhan = createMenuItem("TIẾP NHẬN MÁY", "TIEPNHAN");
+        btnXuLyBaoHanh = createMenuItem("KỸ THUẬT SỬA CHỮA", "BAOHANH"); 
+        
+        btnKhachHang = createMenuItem("QUẢN LÝ KHÁCH HÀNG", "KHACHHANG");
+        btnSanPham = createMenuItem("QUẢN LÝ SẢN PHẨM", "SANPHAM");
+        btnNhanVien = createMenuItem("QUẢN LÝ NHÂN VIÊN", "NHANVIEN");
+        
+        // --- NÚT THỐNG KÊ CHO ADMIN ---
+        btnThongKeAdmin = createMenuItem("THỐNG KÊ BÁO CÁO", "THONGKE_ADMIN");
+
+        // --- ADD VÀO PANEL ---
+        pnlMenuContainer.add(btnTraCuu, gbc);
+        pnlMenuContainer.add(btnTiepNhan, gbc);
+        pnlMenuContainer.add(btnXuLyBaoHanh, gbc);
+        
+        pnlMenuContainer.add(btnKhachHang, gbc);
+        pnlMenuContainer.add(btnSanPham, gbc);
+        pnlMenuContainer.add(btnNhanVien, gbc);
+        
+        pnlMenuContainer.add(btnThongKeAdmin, gbc); // Thêm nút thống kê vào cuối
+
+        // Panel đệm đẩy menu lên trên
+        GridBagConstraints gbcSpace = new GridBagConstraints();
+        gbcSpace.gridx = 0;
+        gbcSpace.gridy = GridBagConstraints.RELATIVE;
+        gbcSpace.weighty = 1.0; 
+        pnlMenuContainer.add(new JPanel(null) {{ setOpaque(false); }}, gbcSpace);
+
+        pnlSidebar.add(pnlMenuContainer, BorderLayout.CENTER);
+        add(pnlSidebar, BorderLayout.WEST);
+
+        // --- 3. CONTENT ---
+        pnlContent = new JPanel();
+        cardLayout = new CardLayout();
+        pnlContent.setLayout(cardLayout);
+        pnlContent.setBackground(new Color(245, 248, 250));
+        
         try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            // Add các Panel Admin
+            pnlContent.add(new Interface.admin.pnlBaoHanh(), "TRACUU_BH");
+            pnlContent.add(new Interface.admin.pnlKhachHang(), "KHACHHANG");
+            pnlContent.add(new Interface.admin.pnlSanPham(), "SANPHAM");
+            pnlContent.add(new Interface.admin.pnlNhanVien(), "NHANVIEN");
+            pnlContent.add(new Interface.admin.pnlThongKe(), "THONGKE_ADMIN"); // Panel Thống kê Admin
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new MainFrame().setVisible(true);
-            }
+        // Add các Panel Nghiệp vụ
+        pnlContent.add(new Interface.PanelTiepNhan(), "TIEPNHAN"); 
+        pnlContent.add(createModuleBaoHanh(), "BAOHANH"); 
+
+        add(pnlContent, BorderLayout.CENTER);
+    }
+
+    private JPanel createModuleBaoHanh() {
+        JPanel p = new JPanel(new BorderLayout());
+        tabBaoHanhTask2 = new JTabbedPane();
+        tabBaoHanhTask2.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        tabBaoHanhTask2.setForeground(new Color(30, 30, 30));
+        
+        tabXuLy = new PanelXuLy();
+        // tabXuLy.setMaNhanVien(maNhanVien); 
+        
+        tabBaoHanhTask2.addTab("Xử Lý Kỹ Thuật", tabXuLy);
+        tabBaoHanhTask2.addTab("Tiến Độ Cá Nhân", new Interface.PanelThongKe()); // Thống kê cá nhân kỹ thuật
+        
+        tabBaoHanhTask2.addChangeListener(e -> {
+            if(tabBaoHanhTask2.getSelectedIndex() == 0) tabXuLy.taiDuLieuLenBang();
         });
+        
+        p.add(tabBaoHanhTask2, BorderLayout.CENTER);
+        return p;
+    }
+
+    private JButton createMenuItem(String text, String cardName) {
+        JButton btn = new JButton(text);
+        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        btn.setForeground(colorText);
+        btn.setBackground(colorMenuItem);
+        btn.setBorder(BorderFactory.createEmptyBorder(15, 20, 15, 20));
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setFocusPainted(false);
+        btn.setBorderPainted(false);
+        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btn.addActionListener(e -> cardLayout.show(pnlContent, cardName));
+
+        btn.addMouseListener(new MouseAdapter() {
+            public void mouseEntered(MouseEvent e) { btn.setBackground(colorMenuHover); }
+            public void mouseExited(MouseEvent e) { btn.setBackground(colorMenuItem); }
+        });
+
+        return btn;
+    }
+
+    private void phanQuyen() {
+        // --- LOGIC PHÂN QUYỀN ---
+        
+        if ("1".equals(maVaiTro)) { // === ADMIN ===
+            btnTraCuu.setVisible(true);
+            btnKhachHang.setVisible(true);
+            btnSanPham.setVisible(true);
+            btnNhanVien.setVisible(true);
+            btnThongKeAdmin.setVisible(true); // Admin thấy thống kê
+            
+            // Ẩn nghiệp vụ
+            btnTiepNhan.setVisible(false);
+            btnXuLyBaoHanh.setVisible(false);
+            
+            cardLayout.show(pnlContent, "TRACUU_BH");
+        } 
+        else if ("3".equals(maVaiTro)) { // === KỸ THUẬT VIÊN ===
+            btnTiepNhan.setVisible(true);
+            btnXuLyBaoHanh.setVisible(true);
+            
+            // Ẩn quản lý & Thống kê Admin
+            btnTraCuu.setVisible(false); 
+            btnKhachHang.setVisible(false);
+            btnSanPham.setVisible(false);
+            btnNhanVien.setVisible(false);
+            btnThongKeAdmin.setVisible(false); // Ẩn
+            
+            cardLayout.show(pnlContent, "BAOHANH");
+        } 
+        else if ("2".equals(maVaiTro)) { // === LỄ TÂN ===
+            btnTraCuu.setVisible(true);
+            btnTiepNhan.setVisible(true);
+            btnKhachHang.setVisible(true);
+            btnSanPham.setVisible(true);
+            
+            // Ẩn kỹ thuật & quản lý sâu
+            btnXuLyBaoHanh.setVisible(false); 
+            btnNhanVien.setVisible(false); 
+            btnThongKeAdmin.setVisible(false); // Ẩn
+            
+            cardLayout.show(pnlContent, "TIEPNHAN");
+        }
+        
+        revalidate();
+        repaint();
+    }
+    
+    public static void main(String[] args) {
+        try {
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        } catch (Exception e) {}
+        SwingUtilities.invokeLater(() -> new MainFrame("Admin Test", "1", 1).setVisible(true));
     }
 }

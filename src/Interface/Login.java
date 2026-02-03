@@ -7,9 +7,12 @@ import javax.swing.border.EmptyBorder;
 import java.awt.event.ActionListener;
 import java.sql.ResultSet;
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
-// Import các class xử lý của bạn
-import Process.*; 
+// Import các class xử lý logic và mã hóa
+import Process.NhanVien;
+import Process.MD5Util;
 
 public class Login extends JFrame {
 
@@ -25,7 +28,7 @@ public class Login extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    // Set giao diện giống hệ điều hành (Windows) cho đẹp
+                    // Set giao diện đẹp theo hệ thống (Windows)
                     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
                     Login frame = new Login();
                     frame.setVisible(true);
@@ -40,29 +43,28 @@ public class Login extends JFrame {
      * Create the frame.
      */
     public Login() {
-        setTitle("Đăng Nhập Hệ Thống"); // Thêm tiêu đề cho cửa sổ
+        setTitle("Đăng Nhập Hệ Thống");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setBounds(100, 100, 500, 320); // Tăng chiều cao một chút để thoáng
-        setLocationRelativeTo(null); // Căn giữa màn hình
-        setResizable(false); // Không cho kéo giãn cửa sổ
+        setBounds(100, 100, 500, 320);
+        setLocationRelativeTo(null); // Ra giữa màn hình
+        setResizable(false);
 
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
         contentPane.setLayout(null);
-        // Set màu nền sáng nhẹ cho toàn bộ form
-        contentPane.setBackground(new Color(240, 248, 255)); 
+        contentPane.setBackground(new Color(240, 248, 255)); // Màu nền AliceBlue
 
         // --- PANEL TIÊU ĐỀ ---
         JPanel panelHeader = new JPanel();
         panelHeader.setBounds(0, 0, 484, 60);
-        panelHeader.setBackground(new Color(176, 224, 230)); // Màu xanh nhạt (PowderBlue)
+        panelHeader.setBackground(new Color(176, 224, 230)); // PowderBlue
         contentPane.add(panelHeader);
         panelHeader.setLayout(null);
 
         JLabel lblTitle = new JLabel("ĐĂNG NHẬP HỆ THỐNG");
         lblTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTitle.setForeground(new Color(0, 51, 102)); // Màu xanh đậm (Dark Blue) - KHÔNG PHẢI TRẮNG
+        lblTitle.setForeground(new Color(0, 51, 102));
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 22));
         lblTitle.setBounds(0, 15, 484, 30);
         panelHeader.add(lblTitle);
@@ -70,14 +72,14 @@ public class Login extends JFrame {
         // --- PANEL NỘI DUNG ---
         JPanel panelBody = new JPanel();
         panelBody.setBounds(10, 70, 464, 200);
-        panelBody.setBackground(new Color(240, 248, 255)); // Đồng bộ màu nền
+        panelBody.setBackground(new Color(240, 248, 255));
         panelBody.setLayout(null);
         contentPane.add(panelBody);
 
         // 1. Tài khoản
         JLabel lblUser = new JLabel("Tài khoản:");
         lblUser.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblUser.setForeground(Color.BLACK); // Chữ đen
+        lblUser.setForeground(Color.BLACK);
         lblUser.setBounds(40, 24, 100, 29);
         panelBody.add(lblUser);
 
@@ -85,12 +87,11 @@ public class Login extends JFrame {
         tenDN.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         tenDN.setBounds(130, 24, 280, 30);
         panelBody.add(tenDN);
-        tenDN.setColumns(10);
-
+        
         // 2. Mật khẩu
         JLabel lblPass = new JLabel("Mật khẩu:");
         lblPass.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblPass.setForeground(Color.BLACK); // Chữ đen
+        lblPass.setForeground(Color.BLACK);
         lblPass.setBounds(40, 80, 100, 29);
         panelBody.add(lblPass);
 
@@ -101,74 +102,91 @@ public class Login extends JFrame {
 
         // 3. Nút Đăng nhập
         JButton btnDangNhap = new JButton("ĐĂNG NHẬP");
-        // Logic xử lý sự kiện giữ nguyên
+        btnDangNhap.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnDangNhap.setBackground(new Color(70, 130, 180)); // SteelBlue
+        btnDangNhap.setForeground(Color.BLACK); // Màu chữ đen cho dễ đọc
+        btnDangNhap.setFocusPainted(false);
+        btnDangNhap.setBounds(130, 140, 280, 40);
+        btnDangNhap.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        // Sự kiện Click chuột
         btnDangNhap.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 xuLyDangNhap();
             }
         });
         
-        btnDangNhap.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnDangNhap.setBackground(new Color(70, 130, 180)); // SteelBlue
-        btnDangNhap.setForeground(Color.BLACK); // Chữ ĐEN theo yêu cầu (hoặc để mặc định)
-        btnDangNhap.setFocusPainted(false); // Bỏ viền focus khi click
-        btnDangNhap.setBounds(130, 140, 280, 40); // Nút to hơn cho dễ bấm
-        btnDangNhap.setCursor(new Cursor(Cursor.HAND_CURSOR)); // Đổi chuột thành bàn tay
         panelBody.add(btnDangNhap);
 
-        // Tính năng: Bấm Enter cũng kích hoạt nút Đăng nhập
+        // Tính năng: Bấm Enter ở ô mật khẩu cũng đăng nhập được
+        txtPass.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                    xuLyDangNhap();
+                }
+            }
+        });
+        
+        // Set nút mặc định khi bấm Enter
         this.getRootPane().setDefaultButton(btnDangNhap);
     }
 
     /**
-     * Tách logic xử lý ra hàm riêng cho gọn
+     * Hàm xử lý đăng nhập chính
      */
     private void xuLyDangNhap() {
-        String username = tenDN.getText();
-        String password = new String(txtPass.getPassword());
+        String username = tenDN.getText().trim();
+        String password = new String(txtPass.getPassword()).trim();
 
+        // 1. Kiểm tra rỗng
         if (username.isEmpty() || password.isEmpty()) {
-            JOptionPane.showMessageDialog(Login.this, "Vui lòng nhập đầy đủ thông tin!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, 
+                "Vui lòng nhập đầy đủ Tài khoản và Mật khẩu!", 
+                "Cảnh báo", 
+                JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
             NhanVien nv = new NhanVien();
-            String mkHash = MD5Util.encryptMD5(password);
+            
+            // 2. Mã hóa mật khẩu MD5 (Nếu CSDL lưu pass thường thì bỏ dòng này)
+            // String mkHash = password; // Dùng dòng này nếu DB lưu pass thường
+            String mkHash = MD5Util.encryptMD5(password); // Dùng dòng này nếu DB lưu MD5
 
+            // 3. Gọi hàm kiểm tra đăng nhập
             ResultSet rs = nv.DangNhap(username, mkHash);
+            
             if (rs.next()) {
-                String mavaitro = rs.getString("MaVaiTro");
-                String tennv = rs.getString("TenNhanVien");
-                // Lấy thêm mã nhân viên nếu cần cho MainFrame
-                int maNV = rs.getInt("MaNhanVien"); 
+                // Lấy thông tin từ CSDL
+                String maVaiTro = rs.getString("MaVaiTro");
+                String tenNV = rs.getString("TenNhanVien");
+                int maNV = rs.getInt("MaNhanVien"); // Lấy ID để ghi Log
 
-                JOptionPane.showMessageDialog(Login.this, "Đăng nhập thành công!\nXin chào: " + tennv);
-                Login.this.dispose();
+                // 4. Thông báo và Chuyển màn hình
+                JOptionPane.showMessageDialog(this, 
+                    "Đăng nhập thành công!\nXin chào: " + tenNV);
+                
+                this.dispose(); // Đóng form Login
 
-                switch (mavaitro) {
-                    case "1": { // Admin
-                        new Admin(tennv).setVisible(true);
-                        break;
-                    }
-                    case "3": { // Kỹ thuật viên (Thêm case này cho MainFrame)
-                         // Giả sử MainFrame của bạn có constructor nhận tên và mã NV
-                         // Nếu MainFrame chưa update constructor, hãy dùng new MainFrame()
-                         // new MainFrame(tennv, maNV).setVisible(true); 
-                         new MainFrame().setVisible(true); // Dùng tạm cái này nếu chưa sửa MainFrame
-                         break;
-                    }
-                    default:
-                        JOptionPane.showMessageDialog(Login.this, "Vai trò không hợp lệ hoặc chưa được cấp quyền!");
-                        // System.exit(0); // Không nên exit hẳn, chỉ không mở form thôi
-                        new Login().setVisible(true); // Mở lại login
-                }
+                // --- ĐÂY LÀ PHẦN QUAN TRỌNG ĐÃ CẬP NHẬT ---
+                // Không dùng switch case để mở các form khác nhau nữa
+                // Mở duy nhất MainFrame và truyền tham số vào để nó tự phân quyền
+                new MainFrame(tenNV, maVaiTro, maNV).setVisible(true);
+                
             } else {
-                JOptionPane.showMessageDialog(Login.this, "Sai tên đăng nhập hoặc mật khẩu!", "Lỗi đăng nhập", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, 
+                    "Sai Tên đăng nhập hoặc Mật khẩu!", 
+                    "Lỗi đăng nhập", 
+                    JOptionPane.ERROR_MESSAGE);
             }
-        } catch (Exception e1) {
-            e1.printStackTrace();
-            JOptionPane.showMessageDialog(Login.this, "Lỗi kết nối cơ sở dữ liệu!");
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, 
+                "Lỗi kết nối CSDL hoặc lỗi hệ thống:\n" + e.getMessage(), 
+                "Lỗi nghiêm trọng", 
+                JOptionPane.ERROR_MESSAGE);
         }
     }
 }
