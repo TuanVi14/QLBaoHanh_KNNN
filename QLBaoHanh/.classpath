@@ -21,5 +21,7 @@
 	<classpathentry kind="lib" path="C:/Users/MSII/.p2/pool/plugins/org.eclipse.ui.forms_3.13.600.v20250707-1254.jar" sourcepath="C:/Users/MSII/.p2/pool/plugins/org.eclipse.ui.forms_3.13.600.v20250707-1254.jar"/>
 	<classpathentry kind="lib" path="C:/Users/MSII/.p2/pool/plugins/org.eclipse.ui.workbench_3.136.0.v20250814-1558.jar" sourcepath="C:/Users/MSII/.p2/pool/plugins/org.eclipse.ui.workbench_3.136.0.v20250814-1558.jar"/>
 	<classpathentry kind="lib" path="D:/java/mysql-connector-java-8.0.22.jar"/>
+	<classpathentry kind="lib" path="D:/tải xuống/poi-ooxml-5.2.3.jar"/>
+	<classpathentry kind="lib" path="D:/tải xuống/poi-5.2.3.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
