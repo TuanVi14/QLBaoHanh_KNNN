@@ -10,19 +10,20 @@ import java.awt.event.MouseEvent;
 import java.sql.Date;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-import Interface.nhanvien.DialogChiTiet;
+import javax.swing.table.JTableHeader;
 
 public class PanelXuLy extends JPanel {
 
-    // Components cho Bảng danh sách
+    private static final long serialVersionUID = 1L;
+
+    // Components
     private JTable tblDanhSach;
     private DefaultTableModel tableModel;
     
-    // Components cho Form xử lý (Bên phải)
+    // Components Form (Bên phải)
     private JLabel lblMaPhieuVal;
     private JLabel lblTenMayVal;
     private JComboBox<String> cboTrangThai;
@@ -33,119 +34,182 @@ public class PanelXuLy extends JPanel {
 
     // Logic
     private NghiepVuBaoHanhBUS bus;
-    private int maPhieuDangChon = -1; // -1 nghĩa là chưa chọn dòng nào
+    private int maPhieuDangChon = -1; 
 
     public PanelXuLy() {
         bus = new NghiepVuBaoHanhBUS();
-        khoiTaoGiaoDien();
+        
+        setLayout(null);
+        setBackground(new Color(240, 248, 255)); // Nền xanh nhạt
+        
+        // Khởi tạo 2 vùng giao diện
+        initPanelTrai();
+        initPanelPhai();
+        
+        // Logic dữ liệu
         taiDuLieuLenBang();
         ganSuKien();
     }
 
-    private void khoiTaoGiaoDien() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    // ========================================================================
+    // PHẦN 1: BÊN TRÁI (BẢNG DANH SÁCH) - Rộng 600px
+    // ========================================================================
+    private void initPanelTrai() {
+        JPanel pnlLeft = new JPanel(null);
+        pnlLeft.setBackground(Color.WHITE);
+        pnlLeft.setBounds(10, 10, 600, 650);
+        pnlLeft.setBorder(new LineBorder(new Color(200, 200, 200), 1, true));
+        add(pnlLeft);
 
-        // --- 1. BẢNG DANH SÁCH (CENTER) ---
-        // Tiêu đề cột khớp với câu SQL trong PhieuBaoHanhDAO
-        String[] cols = {"Mã Phiếu", "Serial", "Tên Sản Phẩm", "Ngày Nhận", "Lỗi Đầu Vào", "Trạng Thái"};
+        // Label tiêu đề
+        JLabel lblTitle = new JLabel("DANH SÁCH PHIẾU CẦN XỬ LÝ");
+        lblTitle.setFont(new Font("Tahoma", Font.BOLD, 16));
+        lblTitle.setForeground(new Color(0, 102, 204));
+        lblTitle.setBounds(20, 15, 400, 30);
+        pnlLeft.add(lblTitle);
+
+        // Bảng dữ liệu
+        String[] cols = {"Mã Phiếu", "Serial", "Tên SP", "Ngày Nhận", "Lỗi", "Trạng Thái"};
         tableModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Không cho sửa trực tiếp trên bảng
+                return false; 
             }
         };
         tblDanhSach = new JTable(tableModel);
-        tblDanhSach.setRowHeight(25);
-        tblDanhSach.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        tblDanhSach.setRowHeight(28);
+        tblDanhSach.setFont(new Font("Tahoma", Font.PLAIN, 13));
         
+        // Header bảng
+        JTableHeader header = tblDanhSach.getTableHeader();
+        header.setFont(new Font("Tahoma", Font.BOLD, 13));
+        header.setBackground(new Color(230, 230, 230));
+        
+        // Chỉnh độ rộng cột
+        tblDanhSach.getColumnModel().getColumn(0).setPreferredWidth(60);  // Mã
+        tblDanhSach.getColumnModel().getColumn(2).setPreferredWidth(150); // Tên SP
+        tblDanhSach.getColumnModel().getColumn(5).setPreferredWidth(100); // Trạng thái
+
         JScrollPane scrPane = new JScrollPane(tblDanhSach);
-        scrPane.setBorder(new TitledBorder("Danh sách phiếu bảo hành"));
-        add(scrPane, BorderLayout.CENTER);
-
-        // --- 2. FORM XỬ LÝ (EAST) ---
-        JPanel pnlRight = new JPanel();
-        pnlRight.setLayout(new BoxLayout(pnlRight, BoxLayout.Y_AXIS));
-        pnlRight.setPreferredSize(new Dimension(320, 0));
-        pnlRight.setBorder(new TitledBorder("Cập nhật tiến độ"));
-
-        // Helper để tạo khoảng cách
-        pnlRight.add(Box.createVerticalStrut(10));
-
-        // Thông tin phiếu đang chọn
-        JPanel pnlInfo = new JPanel(new GridLayout(2, 2, 5, 5));
-        pnlInfo.setMaximumSize(new Dimension(300, 60));
-        pnlInfo.add(new JLabel("Mã Phiếu:"));
-        lblMaPhieuVal = new JLabel("...");
-        lblMaPhieuVal.setFont(new Font("Arial", Font.BOLD, 14));
-        lblMaPhieuVal.setForeground(Color.BLUE);
-        pnlInfo.add(lblMaPhieuVal);
-        
-        pnlInfo.add(new JLabel("Sản phẩm:"));
-        lblTenMayVal = new JLabel("...");
-        pnlInfo.add(lblTenMayVal);
-        pnlRight.add(pnlInfo);
-
-        pnlRight.add(Box.createVerticalStrut(20));
-
-        // Chọn trạng thái mới
-        pnlRight.add(new JLabel("Trạng thái mới:"));
-        String[] trangThaiItems = {"Đang kiểm tra", "Đang chờ linh kiện", "Đang sửa", "Hoàn thành", "Đã trả khách", "Hủy bỏ"};
-        cboTrangThai = new JComboBox<>(trangThaiItems);
-        cboTrangThai.setMaximumSize(new Dimension(300, 30));
-        pnlRight.add(cboTrangThai);
-
-        pnlRight.add(Box.createVerticalStrut(10));
-
-        // Nhập nội dung công việc
-        pnlRight.add(new JLabel("Nội dung xử lý (Ghi chú):"));
-        txtNoiDungXuLy = new JTextArea(4, 20);
-        txtNoiDungXuLy.setLineWrap(true);
-        JScrollPane scrGhiChu = new JScrollPane(txtNoiDungXuLy);
-        scrGhiChu.setMaximumSize(new Dimension(300, 80));
-        scrGhiChu.setAlignmentX(Component.LEFT_ALIGNMENT); // Canh lề trái cho đẹp
-        pnlRight.add(scrGhiChu);
-
-        pnlRight.add(Box.createVerticalStrut(10));
-
-        // Nhập linh kiện thay thế
-        pnlRight.add(new JLabel("Linh kiện thay thế (nếu có):"));
-        txtLinhKien = new JTextField();
-        txtLinhKien.setMaximumSize(new Dimension(300, 30));
-        pnlRight.add(txtLinhKien);
-
-        pnlRight.add(Box.createVerticalStrut(20));
-
-        // Nút bấm
-        JPanel pnlButton = new JPanel(new FlowLayout());
-        btnCapNhat = new JButton("Cập Nhật");
-        btnCapNhat.setBackground(new Color(30, 144, 255)); // DodgerBlue
-        btnCapNhat.setForeground(Color.BLACK);
-        
-        btnXemLichSu = new JButton("Xem Lịch Sử");
-        
-        pnlButton.add(btnCapNhat);
-        pnlButton.add(btnXemLichSu);
-        pnlButton.setMaximumSize(new Dimension(300, 50));
-        
-        pnlRight.add(pnlButton);
-
-        add(pnlRight, BorderLayout.EAST);
+        scrPane.setBounds(10, 60, 580, 580);
+        pnlLeft.add(scrPane);
     }
 
-    // --- LOGIC: Tải dữ liệu từ DB lên bảng ---
-    public void taiDuLieuLenBang() {
-        tableModel.setRowCount(0); // Xóa bảng cũ
-        List<Object[]> list = bus.layDanhSachPhieuChoTable();
+    // ========================================================================
+    // PHẦN 2: BÊN PHẢI (FORM CẬP NHẬT) - Rộng 380px, X=620
+    // ========================================================================
+    private void initPanelPhai() {
+        JPanel pnlRight = new JPanel(null);
+        pnlRight.setBackground(new Color(250, 250, 250));
+        pnlRight.setBounds(620, 10, 380, 650);
+        pnlRight.setBorder(BorderFactory.createTitledBorder(
+                new LineBorder(new Color(0, 102, 204), 1),
+                " CẬP NHẬT TIẾN ĐỘ ",
+                TitledBorder.CENTER, TitledBorder.TOP,
+                new Font("Tahoma", Font.BOLD, 14), new Color(0, 102, 204)
+        ));
+        add(pnlRight);
+
+        int xLabel = 20, xVal = 130, width = 230, height = 30;
+        int y = 50, gap = 50;
+
+        // 1. Mã Phiếu
+        JLabel lblMa = new JLabel("Mã Phiếu:");
+        lblMa.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblMa.setBounds(xLabel, y, 100, height);
+        pnlRight.add(lblMa);
+
+        lblMaPhieuVal = new JLabel("...");
+        lblMaPhieuVal.setFont(new Font("Tahoma", Font.BOLD, 16));
+        lblMaPhieuVal.setForeground(Color.BLUE);
+        lblMaPhieuVal.setBounds(xVal, y, width, height);
+        pnlRight.add(lblMaPhieuVal);
+
+        y += gap;
+        // 2. Sản phẩm
+        JLabel lblTen = new JLabel("Sản phẩm:");
+        lblTen.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblTen.setBounds(xLabel, y, 100, height);
+        pnlRight.add(lblTen);
+
+        lblTenMayVal = new JLabel("...");
+        lblTenMayVal.setFont(new Font("Tahoma", Font.PLAIN, 14));
+        lblTenMayVal.setBounds(xVal, y, width, height);
+        pnlRight.add(lblTenMayVal);
+
+        y += gap;
+        // 3. Trạng thái mới
+        JLabel lblTT = new JLabel("Trạng thái mới:");
+        lblTT.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblTT.setBounds(xLabel, y, 100, height);
+        pnlRight.add(lblTT);
+
+        String[] trangThaiItems = {"Đang kiểm tra", "Đang chờ linh kiện", "Đang sửa", "Hoàn thành", "Đã trả khách", "Hủy bỏ"};
+        cboTrangThai = new JComboBox<>(trangThaiItems);
+        cboTrangThai.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        cboTrangThai.setBounds(xVal, y, 220, height);
+        pnlRight.add(cboTrangThai);
+
+        y += gap;
+        // 4. Nội dung xử lý
+        JLabel lblND = new JLabel("Nội dung xử lý:");
+        lblND.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblND.setBounds(xLabel, y, 100, height);
+        pnlRight.add(lblND);
+
+        txtNoiDungXuLy = new JTextArea();
+        txtNoiDungXuLy.setLineWrap(true);
+        txtNoiDungXuLy.setWrapStyleWord(true);
+        txtNoiDungXuLy.setFont(new Font("Tahoma", Font.PLAIN, 13));
         
+        JScrollPane scrGhiChu = new JScrollPane(txtNoiDungXuLy);
+        scrGhiChu.setBounds(xLabel, y + 30, 330, 80); // TextArea nằm dưới label
+        pnlRight.add(scrGhiChu);
+
+        y += 130; // Nhảy qua TextArea
+        // 5. Linh kiện
+        JLabel lblLK = new JLabel("Linh kiện thay:");
+        lblLK.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblLK.setBounds(xLabel, y, 100, height);
+        pnlRight.add(lblLK);
+
+        txtLinhKien = new JTextField();
+        txtLinhKien.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        txtLinhKien.setBounds(xVal, y, 220, height);
+        pnlRight.add(txtLinhKien);
+
+        // --- BUTTONS ---
+        int btnY = 380;
+        
+        btnCapNhat = new JButton("Cập Nhật");
+        btnCapNhat.setFont(new Font("Tahoma", Font.BOLD, 13));
+        btnCapNhat.setBackground(new Color(135, 206, 250)); // LightSkyBlue
+        btnCapNhat.setForeground(Color.BLACK); // Chữ Đen
+        btnCapNhat.setBounds(40, btnY, 130, 40);
+        pnlRight.add(btnCapNhat);
+
+        btnXemLichSu = new JButton("Xem Lịch Sử");
+        btnXemLichSu.setFont(new Font("Tahoma", Font.BOLD, 13));
+        btnXemLichSu.setBackground(new Color(255, 228, 181)); // Moccasin (Cam nhạt)
+        btnXemLichSu.setForeground(Color.BLACK); // Chữ Đen
+        btnXemLichSu.setBounds(200, btnY, 130, 40);
+        pnlRight.add(btnXemLichSu);
+    }
+
+    // ========================================================================
+    // LOGIC XỬ LÝ (GIỮ NGUYÊN)
+    // ========================================================================
+    
+    public void taiDuLieuLenBang() {
+        tableModel.setRowCount(0); 
+        List<Object[]> list = bus.layDanhSachPhieuChoTable();
         for (Object[] row : list) {
-            // Row gồm: MaPhieu, Serial, TenSP, NgayNhan, Loi, TrangThai
             tableModel.addRow(row);
         }
     }
 
     private void ganSuKien() {
-        // 1. Sự kiện click vào bảng -> Đổ dữ liệu sang Form bên phải
+        // Click bảng
         tblDanhSach.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -155,17 +219,14 @@ public class PanelXuLy extends JPanel {
                     String tenMay = (String) tblDanhSach.getValueAt(selectedRow, 2);
                     String trangThaiHienTai = (String) tblDanhSach.getValueAt(selectedRow, 5);
 
-                    // Hiển thị lên Label
                     lblMaPhieuVal.setText(String.valueOf(maPhieuDangChon));
                     lblTenMayVal.setText(tenMay);
-                    
-                    // Set combobox về đúng trạng thái hiện tại
                     cboTrangThai.setSelectedItem(trangThaiHienTai);
                 }
             }
         });
 
-        // 2. Sự kiện nút Cập nhật
+        // Nút Cập nhật
         btnCapNhat.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -173,7 +234,7 @@ public class PanelXuLy extends JPanel {
             }
         });
 
-        // 3. Sự kiện nút Xem Lịch sử
+        // Nút Xem Lịch sử
         btnXemLichSu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -198,26 +259,18 @@ public class PanelXuLy extends JPanel {
         String linhKien = txtLinhKien.getText().trim();
         if (linhKien.isEmpty()) linhKien = "Không";
 
-        // Tạo đối tượng LichSuXuLy
         LichSuXuLy lichSu = new LichSuXuLy();
         lichSu.setMaPhieu(maPhieuDangChon);
-        
-        // LƯU Ý: Ở đây ta tạm set cứng Mã Nhân Viên = 3 (Kỹ thuật)
-        // Khi ghép với code của bạn kia (có chức năng Login), bạn sẽ lấy ID từ biến Session
-        lichSu.setMaNhanVien(3); 
-        
+        lichSu.setMaNhanVien(3); // Tạm set cứng ID kỹ thuật
         lichSu.setNoiDungXuLy(noiDung);
         lichSu.setLinhKienThayThe(linhKien);
         lichSu.setNgayHoanThanh(new Date(System.currentTimeMillis()));
 
-        // Gọi BUS cập nhật (Transaction)
         boolean ketQua = bus.capNhatTienDo(maPhieuDangChon, trangThaiMoi, lichSu);
 
         if (ketQua) {
             JOptionPane.showMessageDialog(this, "Cập nhật thành công!");
-            taiDuLieuLenBang(); // Refresh lại bảng
-            
-            // Clear form
+            taiDuLieuLenBang();
             txtNoiDungXuLy.setText("");
             txtLinhKien.setText("");
         } else {
@@ -232,11 +285,7 @@ public class PanelXuLy extends JPanel {
             return;
         }
 
-        // 1. Lấy Serial Number từ bảng (Cột thứ 2, index = 1)
         String serial = (String) tblDanhSach.getValueAt(selectedRow, 1); 
-        // Lưu ý: Trong model cols của bạn: {"Mã Phiếu", "Serial", ...} thì Serial là index 1
-
-        // 2. Lấy dữ liệu từ BUS
         List<Object[]> listHistory = bus.layLichSuThietBi(serial);
 
         if (listHistory.isEmpty()) {
@@ -244,12 +293,11 @@ public class PanelXuLy extends JPanel {
             return;
         }
 
-        // 3. Tạo Dialog hiển thị danh sách
+        // Tạo Dialog hiển thị danh sách
         JDialog dialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Lịch sử sửa chữa - Serial: " + serial);
-        dialog.setSize(600, 300);
+        dialog.setSize(700, 350);
         dialog.setLocationRelativeTo(this);
 
-        // Tạo bảng hiển thị
         String[] cols = {"Mã Phiếu", "Ngày Nhận", "Lỗi Báo Cáo", "Trạng Thái Cuối"};
         DefaultTableModel model = new DefaultTableModel(cols, 0);
         
@@ -258,6 +306,7 @@ public class PanelXuLy extends JPanel {
         }
 
         JTable tblHistory = new JTable(model);
+        tblHistory.setRowHeight(25);
         dialog.add(new JScrollPane(tblHistory));
 
         dialog.setVisible(true);

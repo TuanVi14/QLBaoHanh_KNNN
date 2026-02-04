@@ -10,13 +10,12 @@ import javax.swing.border.MatteBorder;
 import Interface.admin.pnlNhanVien;
 import Interface.admin.pnlSanPham;
 import Interface.admin.pnlKhachHang;
-import Interface.admin.pnlBaoHanh; // Tra cứu danh sách
-import Interface.admin.pnlThongKe; // Thống kê báo cáo (Admin)
+import Interface.admin.pnlBaoHanh; 
+import Interface.admin.pnlThongKe; 
 
 // Import các Panel Nghiệp vụ
 import Interface.nhanvien.PanelTiepNhan;
 import Interface.nhanvien.PanelXuLy;
-import Interface.nhanvien.PanelThongKe; // Thống kê cá nhân (Kỹ thuật)
 
 public class MainFrame extends JFrame {
 
@@ -30,13 +29,10 @@ public class MainFrame extends JFrame {
     private JPanel pnlContent;
     private CardLayout cardLayout;
 
-    private JTabbedPane tabBaoHanhTask2;
-    private PanelXuLy tabXuLy;
-    
     // Màu sắc giao diện
     private Color colorMenuBackground = new Color(44, 62, 80); 
-    private Color colorMenuItem = new Color(44, 62, 80);       
-    private Color colorMenuHover = new Color(52, 73, 94);      
+    private Color colorMenuItem = new Color(44, 62, 80);        
+    private Color colorMenuHover = new Color(52, 73, 94);       
     private Color colorText = new Color(220, 220, 220); 
     private Color colorHeaderBg = new Color(240, 240, 240);
 
@@ -150,11 +146,10 @@ public class MainFrame extends JFrame {
         
         try {
             // Add các Panel Admin
-            // [CẬP NHẬT] Truyền tenNhanVien vào Constructor pnlBaoHanh để in phiếu
             pnlContent.add(new Interface.admin.pnlBaoHanh(this.tenNhanVien), "TRACUU_BH");
             
             pnlContent.add(new Interface.admin.pnlKhachHang(), "KHACHHANG");
-            pnlContent.add(new Interface.admin.pnlSanPham(), "SANPHAM");
+            pnlContent.add(new Interface.admin.pnlSanPham(), "SANPHAM"); // Giữ nguyên khởi tạo mặc định
             pnlContent.add(new Interface.admin.pnlNhanVien(), "NHANVIEN");
             pnlContent.add(new Interface.admin.pnlThongKe(), "THONGKE_ADMIN"); 
         } catch (Exception e) {
@@ -163,33 +158,11 @@ public class MainFrame extends JFrame {
 
         // Add các Panel Nghiệp vụ
         pnlContent.add(new Interface.nhanvien.PanelTiepNhan(), "TIEPNHAN"); 
-        pnlContent.add(createModuleBaoHanh(), "BAOHANH"); 
+        
+        // Chỉ add PanelXuLy trực tiếp, không dùng TabbedPane
+        pnlContent.add(new Interface.nhanvien.PanelXuLy(), "BAOHANH"); 
 
         add(pnlContent, BorderLayout.CENTER);
-    }
-
-    private JPanel createModuleBaoHanh() {
-        JPanel p = new JPanel(new BorderLayout());
-        tabBaoHanhTask2 = new JTabbedPane();
-        tabBaoHanhTask2.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        tabBaoHanhTask2.setForeground(new Color(30, 30, 30));
-        
-        tabXuLy = new PanelXuLy();
-        
-        // Tạo Panel Thống Kê Cá Nhân và truyền Mã NV vào
-        Interface.nhanvien.PanelThongKe pnlTKCaNhan = new Interface.nhanvien.PanelThongKe();
-        pnlTKCaNhan.setMaNhanVien(this.maNhanVien); 
-        
-        tabBaoHanhTask2.addTab("Xử Lý Kỹ Thuật", tabXuLy);
-        tabBaoHanhTask2.addTab("Tiến Độ Cá Nhân", pnlTKCaNhan); 
-        
-        tabBaoHanhTask2.addChangeListener(e -> {
-            if(tabBaoHanhTask2.getSelectedIndex() == 0) tabXuLy.taiDuLieuLenBang();
-            if(tabBaoHanhTask2.getSelectedIndex() == 1) pnlTKCaNhan.taiDuLieu();
-        });
-        
-        p.add(tabBaoHanhTask2, BorderLayout.CENTER);
-        return p;
     }
 
     private JButton createMenuItem(String text, String cardName) {
@@ -203,7 +176,19 @@ public class MainFrame extends JFrame {
         btn.setBorderPainted(false);
         btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
         
-        btn.addActionListener(e -> cardLayout.show(pnlContent, cardName));
+        btn.addActionListener(e -> {
+            cardLayout.show(pnlContent, cardName);
+            
+            // Nếu là panel Xử lý -> Gọi hàm load lại dữ liệu để cập nhật mới nhất
+            if(cardName.equals("BAOHANH")) {
+                Component[] comps = pnlContent.getComponents();
+                for (Component comp : comps) {
+                    if (comp instanceof PanelXuLy && comp.isVisible()) {
+                        ((PanelXuLy) comp).taiDuLieuLenBang();
+                    }
+                }
+            }
+        });
 
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) { btn.setBackground(colorMenuHover); }
@@ -214,30 +199,24 @@ public class MainFrame extends JFrame {
     }
 
     private void phanQuyen() {
-        // --- LOGIC PHÂN QUYỀN MỚI ---
+        // --- LOGIC PHÂN QUYỀN ---
         
         if ("1".equals(maVaiTro)) { // === ADMIN ===
-            // Admin thấy quản lý, thống kê
             btnKhachHang.setVisible(true);
             btnSanPham.setVisible(true);
             btnNhanVien.setVisible(true);
             btnThongKeAdmin.setVisible(true);
             
-            // [CẬP NHẬT] Admin KHÔNG tra cứu danh sách phiếu (dành cho lễ tân)
             btnTraCuu.setVisible(false);
-            
-            // Ẩn nghiệp vụ lễ tân/kỹ thuật
             btnTiepNhan.setVisible(false);
             btnXuLyBaoHanh.setVisible(false);
             
-            // Mặc định vào trang Thống kê Admin (thay vì Tra cứu)
             cardLayout.show(pnlContent, "THONGKE_ADMIN");
         } 
         else if ("3".equals(maVaiTro)) { // === KỸ THUẬT VIÊN ===
             btnTiepNhan.setVisible(true);
             btnXuLyBaoHanh.setVisible(true);
             
-            // Ẩn quản lý & Thống kê Admin & Tra cứu
             btnTraCuu.setVisible(false); 
             btnKhachHang.setVisible(false);
             btnSanPham.setVisible(false);
@@ -247,20 +226,16 @@ public class MainFrame extends JFrame {
             cardLayout.show(pnlContent, "BAOHANH");
         } 
         else if ("2".equals(maVaiTro)) { // === LỄ TÂN ===
-            // [CẬP NHẬT] Lễ tân ĐƯỢC tra cứu danh sách
             btnTraCuu.setVisible(true);
-            
             btnTiepNhan.setVisible(true);
             btnKhachHang.setVisible(true);
             btnSanPham.setVisible(true);
             
-            // Ẩn kỹ thuật & quản lý sâu
             btnXuLyBaoHanh.setVisible(false); 
             btnNhanVien.setVisible(false); 
             btnThongKeAdmin.setVisible(false); 
             
-            // Mặc định vào Tra cứu hoặc Tiếp nhận
-            cardLayout.show(pnlContent, "TIEPNHAN");
+            cardLayout.show(pnlContent, "TRACUU_BH");
         }
         
         revalidate();

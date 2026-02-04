@@ -1,28 +1,16 @@
 package Interface.admin;
 
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import javax.swing.*;
+import javax.swing.border.LineBorder;
+import javax.swing.border.TitledBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
+import java.awt.*;
+import java.awt.event.*;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JTextArea;
-import javax.swing.border.LineBorder;
-import javax.swing.table.DefaultTableModel;
-import javax.swing.table.JTableHeader;
 
 import Process.KhachHang;
 
@@ -30,250 +18,263 @@ public class pnlKhachHang extends JPanel {
 
     private static final long serialVersionUID = 1L;
     
+    // Logic
     private final KhachHang kh = new KhachHang();
     private final DefaultTableModel tableModel = new DefaultTableModel();
     private boolean cothem = true;
     
+    // Components
     private JTextField txtTimKiem;
     private JTextField txtMaKH;
     private JTextField txtTenKH;
     private JTextField txtSDT;
-    private JTextArea txtDiaChi;
+    private JTextArea txtDiaChi; // Dùng TextArea cho địa chỉ
     private JTable table;
     
     private JButton btnThem, btnXoa, btnSua, btnLuu, btnKluu;
 
-    /**
-     * Create the panel.
-     * @throws SQLException 
-     */
     public pnlKhachHang() throws SQLException {
-        // Sử dụng Layout tự do (Truyền thống)
         setLayout(null);
-        setBackground(new Color(240, 248, 255)); // Nền xanh nhạt dịu mắt
+        setBackground(new Color(240, 248, 255)); // Nền xanh nhạt
         
-        // --- 1. KHU VỰC TÌM KIẾM (Trên cùng) ---
-        // Kéo dài thanh tìm kiếm ra giữa màn hình
-        JLabel lblTimKiem = new JLabel("Tìm kiếm Khách hàng:");
-        lblTimKiem.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        lblTimKiem.setBounds(50, 20, 160, 30);
-        add(lblTimKiem);
+        // --- KHỞI TẠO 2 VÙNG CHÍNH ---
+        initPanelTrai(); // Bảng + Tìm kiếm
+        initPanelPhai(); // Form nhập liệu + Nút bấm
+        
+        // Init Data
+        ShowData();
+        setNull();
+        setKhoa(true);
+    }
+    
+    // ========================================================================
+    // PHẦN 1: BÊN TRÁI (TÌM KIẾM + BẢNG) - Rộng 600px
+    // ========================================================================
+    private void initPanelTrai() {
+        JPanel pnlLeft = new JPanel(null);
+        pnlLeft.setBackground(Color.WHITE);
+        pnlLeft.setBounds(10, 10, 600, 650); 
+        pnlLeft.setBorder(new LineBorder(new Color(200, 200, 200), 1, true));
+        add(pnlLeft);
+        
+        // --- 1.1 THANH TÌM KIẾM ---
+        JLabel lblTim = new JLabel("Tìm kiếm:");
+        lblTim.setFont(new Font("Tahoma", Font.BOLD, 13));
+        lblTim.setBounds(20, 20, 80, 30);
+        pnlLeft.add(lblTim);
         
         txtTimKiem = new JTextField();
-        txtTimKiem.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtTimKiem.setBounds(210, 20, 600, 30); // Rộng hơn
-        add(txtTimKiem);
+        txtTimKiem.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        txtTimKiem.setBounds(100, 20, 350, 30);
+        pnlLeft.add(txtTimKiem);
         
-        JButton btnTimKiem = createSimpleButton("Tìm", new Color(70, 130, 180));
-        btnTimKiem.setBounds(820, 20, 100, 30);
-        btnTimKiem.addActionListener(e -> {
-            try {
-                ShowData(txtTimKiem.getText().trim());
-            } catch (SQLException ex) {
-                ex.printStackTrace();
-            }
+        JButton btnTim = new JButton("Tìm kiếm");
+        btnTim.setBounds(460, 20, 110, 30);
+        btnTim.setFont(new Font("Tahoma", Font.PLAIN, 12));
+        btnTim.addActionListener(e -> {
+            try { ShowData(txtTimKiem.getText()); } catch (SQLException ex) { ex.printStackTrace(); }
         });
-        add(btnTimKiem);
+        pnlLeft.add(btnTim);
         
-        // --- 2. KHU VỰC NHẬP LIỆU (Giãn cách rộng rãi) ---
-        int yRow1 = 70;
-        int yRow2 = 120;
-        int col1Label = 50, col1Text = 170;
-        int col2Label = 550, col2Text = 670;
-        
-        // Dòng 1: Mã KH & Tên KH
-        JLabel lblMa = new JLabel("Mã Khách Hàng:");
-        lblMa.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblMa.setBounds(col1Label, yRow1, 120, 30);
-        add(lblMa);
-        
-        txtMaKH = new JTextField();
-        txtMaKH.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtMaKH.setBounds(col1Text, yRow1, 300, 30); // Rộng 300
-        add(txtMaKH);
-        
-        JLabel lblTen = new JLabel("Tên Khách Hàng:");
-        lblTen.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblTen.setBounds(col2Label, yRow1, 120, 30);
-        add(lblTen);
-        
-        txtTenKH = new JTextField();
-        txtTenKH.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtTenKH.setBounds(col2Text, yRow1, 350, 30); // Rộng 350
-        add(txtTenKH);
-        
-        // Dòng 2: SĐT & Địa chỉ
-        JLabel lblSDT = new JLabel("Số Điện Thoại:");
-        lblSDT.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblSDT.setBounds(col1Label, yRow2, 120, 30);
-        add(lblSDT);
-        
-        txtSDT = new JTextField();
-        txtSDT.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtSDT.setBounds(col1Text, yRow2, 300, 30);
-        add(txtSDT);
-        
-        JLabel lblDiaChi = new JLabel("Địa Chỉ:");
-        lblDiaChi.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        lblDiaChi.setBounds(col2Label, yRow2, 100, 30);
-        add(lblDiaChi);
-        
-        txtDiaChi = new JTextArea();
-        txtDiaChi.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtDiaChi.setLineWrap(true);
-        txtDiaChi.setWrapStyleWord(true);
-        
-        JScrollPane scrDiaChi = new JScrollPane(txtDiaChi);
-        scrDiaChi.setBounds(col2Text, yRow2, 350, 60); // Cao hơn chút để nhập địa chỉ
-        add(scrDiaChi);
-        
-        // --- 3. CÁC NÚT CHỨC NĂNG (Căn giữa, to rõ) ---
-        int btnY = 200;
-        int btnW = 110;
-        int btnH = 35;
-        int startX = 250; // Điểm bắt đầu để căn giữa
-        int gap = 30;     // Khoảng cách giữa các nút
-        
-        btnThem = createSimpleButton("Thêm", new Color(46, 139, 87)); // Xanh lá
-        btnThem.setBounds(startX, btnY, btnW, btnH);
-        add(btnThem);
-        
-        btnSua = createSimpleButton("Sửa", new Color(255, 165, 0)); // Cam
-        btnSua.setBounds(startX + (btnW + gap) * 1, btnY, btnW, btnH);
-        add(btnSua);
-        
-        btnXoa = createSimpleButton("Xóa", new Color(220, 53, 69)); // Đỏ
-        btnXoa.setBounds(startX + (btnW + gap) * 2, btnY, btnW, btnH);
-        add(btnXoa);
-        
-        btnLuu = createSimpleButton("Lưu", new Color(0, 123, 255)); // Xanh dương
-        btnLuu.setBounds(startX + (btnW + gap) * 3, btnY, btnW, btnH);
-        add(btnLuu);
-        
-        btnKluu = createSimpleButton("Hủy", new Color(108, 117, 125)); // Xám
-        btnKluu.setBounds(startX + (btnW + gap) * 4, btnY, btnW, btnH);
-        add(btnKluu);
-        
-        ganSuKienCacNut(); // Tách logic ra hàm riêng cho gọn code
-        
-        // --- 4. BẢNG DỮ LIỆU (Mở rộng tối đa) ---
+        // --- 1.2 BẢNG DỮ LIỆU ---
         JScrollPane scrollPane = new JScrollPane();
-        // Tọa độ mới: Rộng 1030px, Cao 350px -> Phù hợp màn hình 1280
-        scrollPane.setBounds(20, 260, 1030, 350); 
-        add(scrollPane);
+        scrollPane.setBounds(10, 70, 580, 560);
+        pnlLeft.add(scrollPane);
         
         table = new JTable();
-        table.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        table.setRowHeight(26);
-        
-        // Header bảng đẹp hơn
-        JTableHeader header = table.getTableHeader();
-        header.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        header.setBackground(new Color(0, 102, 204));
-        header.setForeground(Color.BLACK); // Chữ đen theo yêu cầu
+        table.setRowHeight(28);
+        table.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        table.getTableHeader().setFont(new Font("Tahoma", Font.BOLD, 13));
         
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 try { 
-                    int row = table.getSelectedRow(); 
-                    String ma = (table.getModel().getValueAt(row, 0)).toString(); 
-                    ResultSet rs = kh.ShowKHTheoma(ma); 
-                    if(rs.next()) { 
-                     txtMaKH.setText(rs.getString("MaKhachHang")); 
-                     txtTenKH.setText(rs.getString("TenKhachHang")); 
-                     txtSDT.setText(rs.getString("SoDienThoai"));  
-                     txtDiaChi.setText(rs.getString("DiaChi")); 
-                    } 
+                    int row = table.getSelectedRow();
+                    if (row >= 0) {
+                        String ma = table.getModel().getValueAt(row, 0).toString();
+                        ResultSet rs = kh.ShowKHTheoma(ma);
+                        if(rs.next()) { 
+                            txtMaKH.setText(rs.getString("MaKhachHang")); 
+                            txtTenKH.setText(rs.getString("TenKhachHang")); 
+                            txtSDT.setText(rs.getString("SoDienThoai")); 
+                            txtDiaChi.setText(rs.getString("DiaChi"));
+                        }
+                    }
                 } catch (SQLException e1) { e1.printStackTrace(); }
             }
         });
         scrollPane.setViewportView(table);
         
-        String []colsName = {"Mã Khách Hàng", "Tên Khách Hàng", "Số Điện Thoại", "Địa Chỉ"}; 
+        String[] colsName = {"Mã KH", "Tên Khách Hàng", "SĐT", "Địa Chỉ"}; 
         tableModel.setColumnIdentifiers(colsName);   
         table.setModel(tableModel);
         
-        // Khởi tạo ban đầu
-        setNull();
-        setKhoa(true);
-        ShowData();
+        // Chỉnh độ rộng cột
+        table.getColumnModel().getColumn(0).setPreferredWidth(50);
+        table.getColumnModel().getColumn(1).setPreferredWidth(180);
+        table.getColumnModel().getColumn(2).setPreferredWidth(100);
     }
-
-    // --- HÀM TẠO NÚT ĐƠN GIẢN (TRUYỀN THỐNG) ---
-    private JButton createSimpleButton(String text, Color bg) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        btn.setBackground(bg);
-        btn.setForeground(Color.BLACK); 
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btn.setFocusPainted(false);
-        // Không Override UI -> Để Java tự xử lý màu xám khi Disable
-        return btn;
+    
+    // ========================================================================
+    // PHẦN 2: BÊN PHẢI (FORM CHI TIẾT + NÚT) - Rộng 380px, X=620
+    // ========================================================================
+    private void initPanelPhai() {
+        JPanel pnlRight = new JPanel(null);
+        pnlRight.setBackground(new Color(250, 250, 250));
+        pnlRight.setBounds(620, 10, 380, 650); 
+        pnlRight.setBorder(BorderFactory.createTitledBorder(
+                new LineBorder(new Color(0, 102, 204), 1),
+                " THÔNG TIN KHÁCH HÀNG ",
+                TitledBorder.CENTER, TitledBorder.TOP,
+                new Font("Tahoma", Font.BOLD, 14), new Color(0, 102, 204)
+        ));
+        add(pnlRight);
+        
+        int xLabel = 20, xText = 120, widthText = 230, height = 30;
+        int y = 50, gap = 50;
+        
+        // 1. Mã KH
+        JLabel lblMa = new JLabel("Mã KH:");
+        lblMa.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblMa.setBounds(xLabel, y, 90, height);
+        pnlRight.add(lblMa);
+        
+        txtMaKH = new JTextField();
+        txtMaKH.setBounds(xText, y, widthText, height);
+        pnlRight.add(txtMaKH);
+        
+        y += gap;
+        // 2. Tên KH
+        JLabel lblTen = new JLabel("Tên KH:");
+        lblTen.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblTen.setBounds(xLabel, y, 90, height);
+        pnlRight.add(lblTen);
+        
+        txtTenKH = new JTextField();
+        txtTenKH.setBounds(xText, y, widthText, height);
+        pnlRight.add(txtTenKH);
+        
+        y += gap;
+        // 3. SĐT
+        JLabel lblSDT = new JLabel("Số ĐT:");
+        lblSDT.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblSDT.setBounds(xLabel, y, 90, height);
+        pnlRight.add(lblSDT);
+        
+        txtSDT = new JTextField();
+        txtSDT.setBounds(xText, y, widthText, height);
+        pnlRight.add(txtSDT);
+        
+        y += gap;
+        // 4. Địa Chỉ (TextArea)
+        JLabel lblDC = new JLabel("Địa Chỉ:");
+        lblDC.setFont(new Font("Tahoma", Font.BOLD, 12));
+        lblDC.setBounds(xLabel, y, 90, height);
+        pnlRight.add(lblDC);
+        
+        txtDiaChi = new JTextArea();
+        txtDiaChi.setLineWrap(true);
+        txtDiaChi.setWrapStyleWord(true);
+        txtDiaChi.setFont(new Font("Tahoma", Font.PLAIN, 13));
+        
+        JScrollPane scrDC = new JScrollPane(txtDiaChi);
+        scrDC.setBounds(xText, y, widthText, 80); // Cao hơn để nhập nhiều dòng
+        pnlRight.add(scrDC);
+        
+        // --- CÁC NÚT CHỨC NĂNG ---
+        int btnY = 320; // Dời xuống vì có TextArea
+        int btnW = 90;
+        int btnH = 35;
+        int startXBtn = 40;
+        
+        // Hàng 1
+        btnThem = new JButton("Thêm");
+        btnThem.setBounds(startXBtn, btnY, btnW, btnH);
+        pnlRight.add(btnThem);
+        
+        btnSua = new JButton("Sửa");
+        btnSua.setBounds(startXBtn + 100, btnY, btnW, btnH);
+        pnlRight.add(btnSua);
+        
+        btnXoa = new JButton("Xóa");
+        btnXoa.setBounds(startXBtn + 200, btnY, btnW, btnH);
+        pnlRight.add(btnXoa);
+        
+        // Hàng 2
+        btnLuu = new JButton("Lưu");
+        btnLuu.setBounds(80, btnY + 50, 100, btnH);
+        pnlRight.add(btnLuu);
+        
+        btnKluu = new JButton("Hủy");
+        btnKluu.setBounds(200, btnY + 50, 100, btnH);
+        pnlRight.add(btnKluu);
+        
+        ganSuKienCacNut();
     }
-
-    // --- LOGIC SỰ KIỆN ---
+    
+    // ========================================================================
+    // LOGIC XỬ LÝ
+    // ========================================================================
+    
     private void ganSuKienCacNut() {
         btnThem.addActionListener(e -> {
-            setKhoa(false);
-            setNull();
-            cothem = true;
-            txtTenKH.requestFocus();
+            setKhoa(false); setNull(); cothem = true;
+            txtMaKH.requestFocus();
         });
-
+        
         btnXoa.addActionListener(e -> {
             String ma = txtMaKH.getText(); 
             try { 
                 if(ma.length() == 0)              
                     JOptionPane.showMessageDialog(null, "Cần chọn 1 Khách hàng để xóa", "Thông báo", 1); 
-                else { 
-                    if(JOptionPane.showConfirmDialog(null, "Bạn muốn xóa khách hàng " + ma + " này hay không?", "Thông báo", 2) == 0) {     
-                        kh.DeleteKhachHang(ma);
-                        ClearData(); ShowData(); setNull();
-                    } 
-                 } 
-            } catch (SQLException ex) { Logger.getLogger(pnlKhachHang.class.getName()).log(Level.SEVERE, null, ex); }
+                else if(JOptionPane.showConfirmDialog(null, "Bạn muốn xóa khách hàng " + ma + "?", "Thông báo", 2) == 0) {     
+                    kh.DeleteKhachHang(ma);
+                    ClearData(); ShowData(); setNull();
+                } 
+            } catch (SQLException ex) { ex.printStackTrace(); }
         });
-
+        
         btnSua.addActionListener(e -> {
             String ml = txtMaKH.getText(); 
             if(ml.length() == 0) 
                 JOptionPane.showMessageDialog(null, "Vui lòng chọn khách hàng cần sửa", "Thông báo", 1); 
             else { 
-                setKhoa(false);
-                cothem = false;
-                txtMaKH.setEnabled(false);
+                setKhoa(false); cothem = false; 
+                txtMaKH.setEnabled(false); // Không sửa mã
                 txtTenKH.requestFocus();
             }
         });
-
+        
         btnLuu.addActionListener(e -> {
             try {
                 if(txtMaKH.getText().isEmpty() || txtTenKH.getText().isEmpty()) {
                      JOptionPane.showMessageDialog(null, "Vui lòng nhập Mã và Tên KH", "Thông báo", 1);
                      return;
                 }
+                
                 int ma = Integer.parseInt(txtMaKH.getText()); 
                 String ten = txtTenKH.getText(); 
                 String sdt = txtSDT.getText();
-                String dc = txtDiaChi.getText(); 
+                String dc = txtDiaChi.getText();
+                
                 try { 
-                    if(cothem) kh.InsertKhachHang(ma, ten, sdt, dc); 
-                    else kh.EditKhachHang(ma, ten, sdt, dc); 
+                    if(cothem) {    
+                        kh.InsertKhachHang(ma, ten, sdt, dc); 
+                    } else { 
+                        kh.EditKhachHang(ma, ten, sdt, dc); 
+                    }
                     ClearData(); ShowData(); 
                 } catch (SQLException ex) { 
-                   JOptionPane.showMessageDialog(null, "Cập nhật thất bại (Trùng mã)", "Lỗi", 1); 
+                    JOptionPane.showMessageDialog(null, "Cập nhật thất bại (Trùng mã)", "Lỗi", 1); 
                 }             
                 setNull(); setKhoa(true); 
-            } catch (NumberFormatException nfe) {
+            } catch (NumberFormatException ex) {
                 JOptionPane.showMessageDialog(null, "Mã khách hàng phải là số", "Lỗi", 1);
             }
         });
-
-        btnKluu.addActionListener(e -> {
-            setKhoa(true);
-            setNull();
-        });
+        
+        btnKluu.addActionListener(e -> { setKhoa(true); setNull(); });
     }
 
     private void setKhoa(boolean a) {
