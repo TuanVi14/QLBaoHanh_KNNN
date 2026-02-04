@@ -106,7 +106,7 @@ public class MainFrame extends JFrame {
         gbc.insets = new Insets(0, 0, 5, 0); 
         
         // --- KHỞI TẠO CÁC NÚT MENU ---
-        btnTraCuu = createMenuItem("TRA CỨU DANH SÁCH", "TRACUU_BH"); 
+        btnTraCuu = createMenuItem("TRA CỨU BẢO HÀNH", "TRACUU_BH"); 
         btnTiepNhan = createMenuItem("TIẾP NHẬN MÁY", "TIEPNHAN");
         btnXuLyBaoHanh = createMenuItem("KỸ THUẬT SỬA CHỮA", "BAOHANH"); 
         
@@ -229,7 +229,7 @@ public class MainFrame extends JFrame {
             btnTraCuu.setVisible(true);
             btnTiepNhan.setVisible(true);
             btnKhachHang.setVisible(true);
-            btnSanPham.setVisible(true);
+            btnSanPham.setVisible(false);
             
             btnXuLyBaoHanh.setVisible(false); 
             btnNhanVien.setVisible(false); 

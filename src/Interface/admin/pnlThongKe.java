@@ -1,237 +1,123 @@
 package Interface.admin;
 
-import Process.ExcelExport;
 import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.sql.*;
-import java.text.SimpleDateFormat;
-import Interface.MainFrame;
-import Database.DBConnect; // <--- 1. Import thêm class kết nối
+import Process.ThongKe;
 
-/**
- * Panel Thống Kê với nút xuất Excel
- */
 public class pnlThongKe extends JPanel {
-    
-    private JTable tblDanhSach;
-    private DefaultTableModel tableModel;
-    private JLabel lblTongPhieu, lblDangXuLy, lblHoanThanh;
-    private JButton btnXuatExcel;
-    
-    // <--- 2. Khai báo biến kết nối
-    private Connection conn;
-    
+
+    private static final long serialVersionUID = 1L;
+    private ThongKe tk = new ThongKe();
+
+    // dữ liệu biểu đồ
+    private int homNay = 0;
+    private int tuanNay = 0;
+    private int thangNay = 0;
+    private double tyLeHoanThanh = 0;
+
     public pnlThongKe() {
-        // <--- 3. Khởi tạo kết nối
+        setLayout(null);
+        setBackground(new Color(240, 240, 240));
+
+        JLabel lblTitle = new JLabel("BÁO CÁO & THỐNG KÊ");
+        lblTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
+        lblTitle.setBounds(20, 10, 300, 30);
+        add(lblTitle);
+
+        // ===== BIỂU ĐỒ CỘT =====
+        JPanel pnlBar = new BarChartPanel();
+        pnlBar.setBounds(20, 50, 300, 330);
+        pnlBar.setBackground(Color.WHITE);
+        pnlBar.setBorder(BorderFactory.createTitledBorder("PHIẾU BẢO HÀNH THEO THỜI GIAN"));
+        add(pnlBar);
+
+        // ===== BIỂU ĐỒ TRÒN =====
+        JPanel pnlPie = new PieChartPanel();
+        pnlPie.setBounds(340, 50, 300, 330);
+        pnlPie.setBackground(Color.WHITE);
+        pnlPie.setBorder(BorderFactory.createTitledBorder("TỶ LỆ HOÀN THÀNH"));
+        add(pnlPie);
+
+        loadData();
+    }
+
+    // ================= LOAD DATA =================
+    private void loadData() {
         try {
-            DBConnect db = new DBConnect();
-            this.conn = db.getConnection();
+            homNay = tk.ThongKeHomNay();
+            tuanNay = tk.ThongKeTuanNay();
+            thangNay = tk.ThongKeThangNay();
+            tyLeHoanThanh = tk.TyLeHoanThanh();
         } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        initComponents();
-        
-        // Chỉ load dữ liệu nếu có kết nối
-        if (this.conn != null) {
-            loadDuLieu();
-        } else {
-            JOptionPane.showMessageDialog(this, "Lỗi kết nối cơ sở dữ liệu!");
+            JOptionPane.showMessageDialog(this, "Lỗi load dữ liệu thống kê");
         }
     }
-    
-    private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        // Panel điều khiển phía trên
-        JPanel pnlTop = taoPanelTop();
-        add(pnlTop, BorderLayout.NORTH);
-        
-        // Panel thống kê giữa
-        JPanel pnlThongKe = taoPanelThongKe();
-        add(pnlThongKe, BorderLayout.CENTER);
-        
-        // Bảng danh sách
-        JPanel pnlBang = taoPanelBang();
-        add(pnlBang, BorderLayout.SOUTH);
-    }
-    
-    private JPanel taoPanelTop() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-        panel.setBackground(new Color(52, 152, 219));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        JLabel lblTieuDe = new JLabel("THỐNG KÊ BÁO CÁO");
-        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
-        lblTieuDe.setForeground(Color.WHITE);
-        panel.add(lblTieuDe);
-        
-        panel.add(Box.createHorizontalStrut(300));
-        
-        // Nút Xuất Excel
-        btnXuatExcel = new JButton("📊 Xuất Excel");
-        btnXuatExcel.setFont(new Font("Arial", Font.BOLD, 14));
-        btnXuatExcel.setBackground(new Color(46, 204, 113));
-        btnXuatExcel.setForeground(Color.WHITE);
-        btnXuatExcel.setFocusPainted(false);
-        btnXuatExcel.setBorderPainted(false);
-        btnXuatExcel.setPreferredSize(new Dimension(150, 40));
-        btnXuatExcel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnXuatExcel.addActionListener(e -> xuatExcel());
-        panel.add(btnXuatExcel);
-        
-        return panel;
-    }
-    
-    private JPanel taoPanelThongKe() {
-        JPanel panel = new JPanel(new GridLayout(1, 3, 20, 0));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        
-        lblTongPhieu = new JLabel("0", SwingConstants.CENTER);
-        panel.add(taoCard("Tổng Số Phiếu", lblTongPhieu, new Color(52, 152, 219)));
-        
-        lblDangXuLy = new JLabel("0", SwingConstants.CENTER);
-        panel.add(taoCard("Đang Xử Lý", lblDangXuLy, new Color(241, 196, 15)));
-        
-        lblHoanThanh = new JLabel("0", SwingConstants.CENTER);
-        panel.add(taoCard("Hoàn Thành", lblHoanThanh, new Color(46, 204, 113)));
-        
-        return panel;
-    }
-    
-    private JPanel taoCard(String tieuDe, JLabel lblGiaTri, Color mau) {
-        JPanel card = new JPanel(new BorderLayout(5, 5));
-        card.setBackground(mau);
-        card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(mau.darker(), 2),
-            BorderFactory.createEmptyBorder(20, 15, 20, 15)
-        ));
-        
-        JLabel lblTieuDe = new JLabel(tieuDe, SwingConstants.CENTER);
-        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 16));
-        lblTieuDe.setForeground(Color.WHITE);
-        
-        lblGiaTri.setFont(new Font("Arial", Font.BOLD, 36));
-        lblGiaTri.setForeground(Color.WHITE);
-        
-        card.add(lblTieuDe, BorderLayout.NORTH);
-        card.add(lblGiaTri, BorderLayout.CENTER);
-        
-        return card;
-    }
-    
-    private JPanel taoPanelBang() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(52, 152, 219), 2),
-            "Danh Sách Phiếu Bảo Hành",
-            0, 0,
-            new Font("Arial", Font.BOLD, 14),
-            new Color(52, 152, 219)
-        ));
-        panel.setPreferredSize(new Dimension(0, 300));
-        
-        String[] cot = {"Mã Phiếu", "Khách Hàng", "Sản Phẩm", "Ngày Tiếp Nhận", "Trạng Thái"};
-        tableModel = new DefaultTableModel(cot, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        
-        tblDanhSach = new JTable(tableModel);
-        tblDanhSach.setFont(new Font("Arial", Font.PLAIN, 13));
-        tblDanhSach.setRowHeight(25);
-        tblDanhSach.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
-        tblDanhSach.getTableHeader().setBackground(new Color(52, 152, 219));
-        tblDanhSach.getTableHeader().setForeground(Color.BLACK);
-        
-        JScrollPane scrollPane = new JScrollPane(tblDanhSach);
-        panel.add(scrollPane, BorderLayout.CENTER);
-        
-        return panel;
-    }
-    
-    /**
-     * Load dữ liệu thống kê
-     */
-    public void loadDuLieu() {
-        // Kiểm tra kết nối trước khi dùng
-        if (conn == null) return;
 
-        try {
-            // Tổng số phiếu
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as total FROM phieubaohanh");
-            if (rs.next()) {
-                lblTongPhieu.setText(String.valueOf(rs.getInt("total")));
+    // ================= BIỂU ĐỒ CỘT =================
+    class BarChartPanel extends JPanel {
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+
+            int[] values = { homNay, tuanNay, thangNay };
+            String[] labels = { "Hôm nay", "Tuần này", "Tháng này" };
+            Color[] colors = {
+                new Color(52, 152, 219),
+                new Color(241, 196, 15),
+                new Color(46, 204, 113)
+            };
+
+            int max = Math.max(values[0], Math.max(values[1], values[2]));
+            if (max == 0) max = 1;
+
+            int baseY = 250;
+            int barWidth = 50;
+            int gap = 40;
+            int startX = 40;
+
+            for (int i = 0; i < values.length; i++) {
+                int barHeight = values[i] * 180 / max;
+
+                g2.setColor(colors[i]);
+                g2.fillRect(startX + i * (barWidth + gap),
+                        baseY - barHeight,
+                        barWidth,
+                        barHeight);
+
+                g2.setColor(Color.BLACK);
+                g2.drawString(values[i] + " phiếu",
+                        startX + i * (barWidth + gap),
+                        baseY - barHeight - 5);
+                g2.drawString(labels[i],
+                        startX + i * (barWidth + gap),
+                        baseY + 20);
             }
-            
-            // Đang xử lý
-            rs = stmt.executeQuery("SELECT COUNT(*) as total FROM phieubaohanh WHERE TrangThai = 'Đang sửa'");
-            if (rs.next()) {
-                lblDangXuLy.setText(String.valueOf(rs.getInt("total")));
-            }
-            
+        }
+    }
+
+    // ================= BIỂU ĐỒ TRÒN =================
+    class PieChartPanel extends JPanel {
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+
+            int hoanThanh = (int) Math.round(tyLeHoanThanh);
+            int dangXuLy = 100 - hoanThanh;
+
             // Hoàn thành
-            rs = stmt.executeQuery("SELECT COUNT(*) as total FROM phieubaohanh WHERE TrangThai = 'Hoàn thành'");
-            if (rs.next()) {
-                lblHoanThanh.setText(String.valueOf(rs.getInt("total")));
-            }
-            
-            // Load bảng
-            tableModel.setRowCount(0);
-            String sql = "SELECT p.MaPhieu, k.TenKhachHang, m.TenSanPham, p.NgayTiepNhan, p.TrangThai " +
-                        "FROM phieubaohanh p " +
-                        "JOIN sanphamdaban s ON p.MaSPDaBan = s.MaSPDaBan " +
-                        "JOIN sanphammodel m ON s.MaModel = m.MaModel " +
-                        "JOIN hoadon h ON s.MaHoaDon = h.MaHoaDon " +
-                        "JOIN khachhang k ON h.MaKhachHang = k.MaKhachHang " +
-                        "ORDER BY p.NgayTiepNhan DESC LIMIT 50";
-            
-            rs = stmt.executeQuery(sql);
-            while (rs.next()) {
-                tableModel.addRow(new Object[]{
-                    rs.getInt("MaPhieu"),
-                    rs.getString("TenKhachHang"),
-                    rs.getString("TenSanPham"),
-                    new SimpleDateFormat("dd/MM/yyyy").format(rs.getDate("NgayTiepNhan")),
-                    rs.getString("TrangThai")
-                });
-            }
-            
-            rs.close();
-            stmt.close();
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                "Lỗi khi tải dữ liệu: " + e.getMessage(),
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    /**
-     * Xuất Excel
-     */
-    private void xuatExcel() {
-        if (conn == null) {
-            JOptionPane.showMessageDialog(this, "Chưa kết nối CSDL!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            return;
-        }
+            g2.setColor(new Color(46, 204, 113));
+            g2.fillArc(50, 60, 200, 200, 0, hoanThanh * 360 / 100);
 
-        try {
-            ExcelExport excelExport = new ExcelExport(conn);
-            excelExport.xuatExcel((JFrame) SwingUtilities.getWindowAncestor(this));
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                "Lỗi khi xuất Excel: " + e.getMessage(),
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
+            // Đang xử lý
+            g2.setColor(new Color(231, 76, 60));
+            g2.fillArc(50, 60, 200, 200,
+                    hoanThanh * 360 / 100,
+                    dangXuLy * 360 / 100);
+
+            // chú thích
+            g2.setColor(Color.BLACK);
+            g2.drawString("Hoàn thành: " + hoanThanh + "%", 70, 280);
+            g2.drawString("Đang xử lý: " + dangXuLy + "%", 70, 300);
         }
     }
 }
