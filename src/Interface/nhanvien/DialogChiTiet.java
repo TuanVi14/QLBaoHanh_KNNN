@@ -1,4 +1,4 @@
-package Interface;
+package Interface.nhanvien;
 
 import Process.NghiepVuBaoHanhBUS;
 import Process.LichSuXuLy;

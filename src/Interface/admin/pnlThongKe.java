@@ -146,7 +146,7 @@ public class pnlThongKe extends JPanel {
         tblDanhSach.setRowHeight(25);
         tblDanhSach.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
         tblDanhSach.getTableHeader().setBackground(new Color(52, 152, 219));
-        tblDanhSach.getTableHeader().setForeground(Color.WHITE);
+        tblDanhSach.getTableHeader().setForeground(Color.BLACK);
         
         JScrollPane scrollPane = new JScrollPane(tblDanhSach);
         panel.add(scrollPane, BorderLayout.CENTER);

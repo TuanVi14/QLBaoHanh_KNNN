@@ -15,7 +15,7 @@ public class ThongKeBUS {
     private final PhieuBaoHanhDAO phieuDAO = new PhieuBaoHanhDAO();
 
     // =======================================================
-    // PHẦN 1: LOGIC CHO KỸ THUẬT VIÊN (DASHBOARD)
+    // PHẦN 1: LOGIC CHO KỸ THUẬT VIÊN (DASHBOARD - CHUNG)
     // =======================================================
     
     // Đếm số lượng máy đang sửa (Trạng thái KHÁC 'Hoàn thành')
@@ -100,5 +100,37 @@ public class ThongKeBUS {
             e.printStackTrace();
         }
         return 0;
+    }
+    
+    // =======================================================
+    // PHẦN 3: [MỚI BỔ SUNG] LOGIC THỐNG KÊ CÁ NHÂN
+    // =======================================================
+
+    /**
+     * Đếm số phiếu mà nhân viên cụ thể (maNV) đang tham gia xử lý
+     * Logic: Join bảng LichSuXuLy để tìm những phiếu có mã nhân viên này,
+     * và trạng thái phiếu KHÔNG PHẢI là "Hoàn thành" hoặc "Đã trả khách".
+     */
+    public int demDangSuaCuaNV(int maNV) {
+        String sql = "SELECT COUNT(DISTINCT p.MaPhieu) " +
+                     "FROM phieubaohanh p " +
+                     "JOIN lichsuxuly l ON p.MaPhieu = l.MaPhieu " +
+                     "WHERE p.TrangThai NOT IN (N'Hoàn thành', N'Đã trả khách', N'Hủy bỏ') " +
+                     "AND l.MaNhanVien = " + maNV;
+        return dem(sql);
+    }
+
+    /**
+     * Đếm số phiếu mà nhân viên cụ thể (maNV) đã hoàn thành
+     * Logic: Join bảng LichSuXuLy để tìm những phiếu có mã nhân viên này,
+     * và trạng thái phiếu LÀ "Hoàn thành" hoặc "Đã trả khách".
+     */
+    public int demDaXongCuaNV(int maNV) {
+        String sql = "SELECT COUNT(DISTINCT p.MaPhieu) " +
+                     "FROM phieubaohanh p " +
+                     "JOIN lichsuxuly l ON p.MaPhieu = l.MaPhieu " +
+                     "WHERE p.TrangThai IN (N'Hoàn thành', N'Đã trả khách') " +
+                     "AND l.MaNhanVien = " + maNV;
+        return dem(sql);
     }
 }

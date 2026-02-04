@@ -14,9 +14,9 @@ import Interface.admin.pnlBaoHanh; // Tra cứu danh sách
 import Interface.admin.pnlThongKe; // Thống kê báo cáo (Admin)
 
 // Import các Panel Nghiệp vụ
-import Interface.PanelTiepNhan;
-import Interface.PanelXuLy;
-import Interface.PanelThongKe; // Thống kê cá nhân (Kỹ thuật)
+import Interface.nhanvien.PanelTiepNhan;
+import Interface.nhanvien.PanelXuLy;
+import Interface.nhanvien.PanelThongKe; // Thống kê cá nhân (Kỹ thuật)
 
 public class MainFrame extends JFrame {
 
@@ -130,7 +130,7 @@ public class MainFrame extends JFrame {
         pnlMenuContainer.add(btnSanPham, gbc);
         pnlMenuContainer.add(btnNhanVien, gbc);
         
-        pnlMenuContainer.add(btnThongKeAdmin, gbc); // Thêm nút thống kê vào cuối
+        pnlMenuContainer.add(btnThongKeAdmin, gbc); 
 
         // Panel đệm đẩy menu lên trên
         GridBagConstraints gbcSpace = new GridBagConstraints();
@@ -150,17 +150,19 @@ public class MainFrame extends JFrame {
         
         try {
             // Add các Panel Admin
-            pnlContent.add(new Interface.admin.pnlBaoHanh(), "TRACUU_BH");
+            // [CẬP NHẬT] Truyền tenNhanVien vào Constructor pnlBaoHanh để in phiếu
+            pnlContent.add(new Interface.admin.pnlBaoHanh(this.tenNhanVien), "TRACUU_BH");
+            
             pnlContent.add(new Interface.admin.pnlKhachHang(), "KHACHHANG");
             pnlContent.add(new Interface.admin.pnlSanPham(), "SANPHAM");
             pnlContent.add(new Interface.admin.pnlNhanVien(), "NHANVIEN");
-            pnlContent.add(new Interface.admin.pnlThongKe(), "THONGKE_ADMIN"); // Panel Thống kê Admin
+            pnlContent.add(new Interface.admin.pnlThongKe(), "THONGKE_ADMIN"); 
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         // Add các Panel Nghiệp vụ
-        pnlContent.add(new Interface.PanelTiepNhan(), "TIEPNHAN"); 
+        pnlContent.add(new Interface.nhanvien.PanelTiepNhan(), "TIEPNHAN"); 
         pnlContent.add(createModuleBaoHanh(), "BAOHANH"); 
 
         add(pnlContent, BorderLayout.CENTER);
@@ -173,13 +175,17 @@ public class MainFrame extends JFrame {
         tabBaoHanhTask2.setForeground(new Color(30, 30, 30));
         
         tabXuLy = new PanelXuLy();
-        // tabXuLy.setMaNhanVien(maNhanVien); 
+        
+        // Tạo Panel Thống Kê Cá Nhân và truyền Mã NV vào
+        Interface.nhanvien.PanelThongKe pnlTKCaNhan = new Interface.nhanvien.PanelThongKe();
+        pnlTKCaNhan.setMaNhanVien(this.maNhanVien); 
         
         tabBaoHanhTask2.addTab("Xử Lý Kỹ Thuật", tabXuLy);
-        tabBaoHanhTask2.addTab("Tiến Độ Cá Nhân", new Interface.PanelThongKe()); // Thống kê cá nhân kỹ thuật
+        tabBaoHanhTask2.addTab("Tiến Độ Cá Nhân", pnlTKCaNhan); 
         
         tabBaoHanhTask2.addChangeListener(e -> {
             if(tabBaoHanhTask2.getSelectedIndex() == 0) tabXuLy.taiDuLieuLenBang();
+            if(tabBaoHanhTask2.getSelectedIndex() == 1) pnlTKCaNhan.taiDuLieu();
         });
         
         p.add(tabBaoHanhTask2, BorderLayout.CENTER);
@@ -208,36 +214,42 @@ public class MainFrame extends JFrame {
     }
 
     private void phanQuyen() {
-        // --- LOGIC PHÂN QUYỀN ---
+        // --- LOGIC PHÂN QUYỀN MỚI ---
         
         if ("1".equals(maVaiTro)) { // === ADMIN ===
-            btnTraCuu.setVisible(true);
+            // Admin thấy quản lý, thống kê
             btnKhachHang.setVisible(true);
             btnSanPham.setVisible(true);
             btnNhanVien.setVisible(true);
-            btnThongKeAdmin.setVisible(true); // Admin thấy thống kê
+            btnThongKeAdmin.setVisible(true);
             
-            // Ẩn nghiệp vụ
+            // [CẬP NHẬT] Admin KHÔNG tra cứu danh sách phiếu (dành cho lễ tân)
+            btnTraCuu.setVisible(false);
+            
+            // Ẩn nghiệp vụ lễ tân/kỹ thuật
             btnTiepNhan.setVisible(false);
             btnXuLyBaoHanh.setVisible(false);
             
-            cardLayout.show(pnlContent, "TRACUU_BH");
+            // Mặc định vào trang Thống kê Admin (thay vì Tra cứu)
+            cardLayout.show(pnlContent, "THONGKE_ADMIN");
         } 
         else if ("3".equals(maVaiTro)) { // === KỸ THUẬT VIÊN ===
             btnTiepNhan.setVisible(true);
             btnXuLyBaoHanh.setVisible(true);
             
-            // Ẩn quản lý & Thống kê Admin
+            // Ẩn quản lý & Thống kê Admin & Tra cứu
             btnTraCuu.setVisible(false); 
             btnKhachHang.setVisible(false);
             btnSanPham.setVisible(false);
             btnNhanVien.setVisible(false);
-            btnThongKeAdmin.setVisible(false); // Ẩn
+            btnThongKeAdmin.setVisible(false);
             
             cardLayout.show(pnlContent, "BAOHANH");
         } 
         else if ("2".equals(maVaiTro)) { // === LỄ TÂN ===
+            // [CẬP NHẬT] Lễ tân ĐƯỢC tra cứu danh sách
             btnTraCuu.setVisible(true);
+            
             btnTiepNhan.setVisible(true);
             btnKhachHang.setVisible(true);
             btnSanPham.setVisible(true);
@@ -245,8 +257,9 @@ public class MainFrame extends JFrame {
             // Ẩn kỹ thuật & quản lý sâu
             btnXuLyBaoHanh.setVisible(false); 
             btnNhanVien.setVisible(false); 
-            btnThongKeAdmin.setVisible(false); // Ẩn
+            btnThongKeAdmin.setVisible(false); 
             
+            // Mặc định vào Tra cứu hoặc Tiếp nhận
             cardLayout.show(pnlContent, "TIEPNHAN");
         }
         

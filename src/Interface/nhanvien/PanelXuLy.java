@@ -1,4 +1,4 @@
-package Interface;
+package Interface.nhanvien;
 
 import Process.NghiepVuBaoHanhBUS;
 import Process.LichSuXuLy;
@@ -14,7 +14,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
-import Interface.DialogChiTiet;
+import Interface.nhanvien.DialogChiTiet;
 
 public class PanelXuLy extends JPanel {
 
@@ -226,21 +226,40 @@ public class PanelXuLy extends JPanel {
     }
 
     private void hienThiLichSu() {
-        // 1. Kiểm tra xem đã chọn dòng nào trên bảng chưa
-        if (maPhieuDangChon == -1) {
-            JOptionPane.showMessageDialog(this, "Vui lòng chọn phiếu để xem lịch sử!");
+        int selectedRow = tblDanhSach.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một dòng trong bảng để lấy Serial Number!");
             return;
         }
 
-        // 2. Lấy cửa sổ cha (MainFrame) để làm owner cho Dialog
-        // SwingUtilities.getWindowAncestor(this) giúp tìm ra Frame chứa Panel này
-        JFrame parentFrame = (JFrame) SwingUtilities.getWindowAncestor(this);
+        // 1. Lấy Serial Number từ bảng (Cột thứ 2, index = 1)
+        String serial = (String) tblDanhSach.getValueAt(selectedRow, 1); 
+        // Lưu ý: Trong model cols của bạn: {"Mã Phiếu", "Serial", ...} thì Serial là index 1
+
+        // 2. Lấy dữ liệu từ BUS
+        List<Object[]> listHistory = bus.layLichSuThietBi(serial);
+
+        if (listHistory.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Thiết bị này chưa có lịch sử sửa chữa nào trước đây.");
+            return;
+        }
+
+        // 3. Tạo Dialog hiển thị danh sách
+        JDialog dialog = new JDialog((JFrame) SwingUtilities.getWindowAncestor(this), "Lịch sử sửa chữa - Serial: " + serial);
+        dialog.setSize(600, 300);
+        dialog.setLocationRelativeTo(this);
+
+        // Tạo bảng hiển thị
+        String[] cols = {"Mã Phiếu", "Ngày Nhận", "Lỗi Báo Cáo", "Trạng Thái Cuối"};
+        DefaultTableModel model = new DefaultTableModel(cols, 0);
         
-        // 3. Khởi tạo và hiển thị DialogChiTiet
-        // Truyền vào Frame cha và Mã phiếu đang chọn
-        DialogChiTiet dialog = new DialogChiTiet(parentFrame, maPhieuDangChon);
-        
-        // 4. Hiển thị Dialog (Do setModal(true) nên code sẽ dừng tại đây cho đến khi tắt dialog)
+        for (Object[] row : listHistory) {
+            model.addRow(row);
+        }
+
+        JTable tblHistory = new JTable(model);
+        dialog.add(new JScrollPane(tblHistory));
+
         dialog.setVisible(true);
     }
 }

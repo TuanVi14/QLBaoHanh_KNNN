@@ -1,4 +1,4 @@
-package Interface;
+package Interface.nhanvien;
 
 import Process.ThongKeBUS;
 import java.awt.*;
@@ -11,7 +11,13 @@ public class PanelThongKe extends JPanel {
 
     private JLabel lblMayDangSua;
     private JLabel lblMayDaXong;
+    // [BỔ SUNG 1] Biến lưu tiêu đề để thay đổi nội dung linh hoạt
+    private JLabel lblTitle; 
+    
     private ThongKeBUS bus;
+    
+    // [BỔ SUNG 2] Biến lưu mã nhân viên (-1 là chế độ xem tổng quan cũ)
+    private int maNhanVien = -1;
 
     public PanelThongKe() {
         bus = new ThongKeBUS();
@@ -19,7 +25,7 @@ public class PanelThongKe extends JPanel {
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
         // Tiêu đề
-        JLabel lblTitle = new JLabel("TỔNG QUAN TÌNH HÌNH BẢO HÀNH", SwingConstants.CENTER);
+        lblTitle = new JLabel("TỔNG QUAN TÌNH HÌNH BẢO HÀNH", SwingConstants.CENTER);
         lblTitle.setFont(new Font("Arial", Font.BOLD, 24));
         lblTitle.setForeground(new Color(0, 102, 204));
         add(lblTitle, BorderLayout.NORTH);
@@ -57,6 +63,15 @@ public class PanelThongKe extends JPanel {
         // Tải dữ liệu lần đầu
         taiDuLieu();
     }
+    
+    // [BỔ SUNG 3] Hàm này để MainFrame gọi, sửa lỗi "undefined method"
+    public void setMaNhanVien(int maNV) {
+        this.maNhanVien = maNV;
+        // Đổi tiêu đề cho phù hợp ngữ cảnh
+        lblTitle.setText("TIẾN ĐỘ CÔNG VIỆC CÁ NHÂN");
+        // Tải lại dữ liệu theo mã nhân viên mới
+        taiDuLieu();
+    }
 
     // Hàm tạo giao diện cho 1 thẻ thống kê (Card)
     private JPanel taoTheThongKe(String title, Color bgColor) {
@@ -82,10 +97,21 @@ public class PanelThongKe extends JPanel {
         return panel;
     }
 
-    // Gọi BUS lấy số liệu mới nhất
+    // [CẬP NHẬT] Gọi BUS lấy số liệu (Hỗ trợ cả tổng quan và cá nhân)
     public void taiDuLieu() {
-        int dangSua = bus.demMayDangSua();
-        int daXong = bus.demMayDaXong();
+        int dangSua = 0;
+        int daXong = 0;
+
+        if (maNhanVien > 0) {
+            // == LOGIC MỚI: Thống kê cá nhân ==
+            // (Đảm bảo ThongKeBUS đã có 2 hàm này như bài trước tôi gửi)
+            dangSua = bus.demDangSuaCuaNV(maNhanVien);
+            daXong = bus.demDaXongCuaNV(maNhanVien);
+        } else {
+            // == LOGIC CŨ: Giữ nguyên cho Admin/Tổng quan ==
+            dangSua = bus.demMayDangSua();
+            daXong = bus.demMayDaXong();
+        }
 
         lblMayDangSua.setText(String.valueOf(dangSua));
         lblMayDaXong.setText(String.valueOf(daXong));

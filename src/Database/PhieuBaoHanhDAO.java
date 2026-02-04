@@ -10,7 +10,11 @@ import java.util.List;
 
 public class PhieuBaoHanhDAO {
 
-    // 1. Thêm phiếu bảo hành mới
+    // ==========================================================
+    // 1. CHỨC NĂNG NGHIỆP VỤ (THÊM / SỬA)
+    // ==========================================================
+
+    // Thêm phiếu bảo hành mới (Dùng cho PanelTiepNhan)
     public boolean taoPhieuMoi(PhieuBaoHanh pbh) {
         DBConnect db = new DBConnect();
         Connection conn = db.getConnection();
@@ -33,7 +37,7 @@ public class PhieuBaoHanhDAO {
         return false;
     }
 
-    // 2. Cập nhật trạng thái phiếu
+    // Cập nhật trạng thái phiếu (Dùng cho Kỹ thuật viên / Trả máy)
     public boolean capNhatTrangThai(int maPhieu, String trangThaiMoi) {
         DBConnect db = new DBConnect();
         Connection conn = db.getConnection();
@@ -53,18 +57,28 @@ public class PhieuBaoHanhDAO {
         }
         return false;
     }
+
+    // ==========================================================
+    // 2. CHỨC NĂNG TRA CỨU / HIỂN THỊ
+    // ==========================================================
     
-    // 3. Lấy danh sách phiếu đầy đủ
+    /**
+     * Lấy danh sách phiếu đầy đủ (ĐÃ TỐI ƯU)
+     * - Bổ sung JOIN bảng KhachHang để hiển thị tên khách (Quan trọng cho Admin)
+     */
     public List<Object[]> layDanhSachPhieuDayDu() {
         List<Object[]> list = new ArrayList<>();
         DBConnect db = new DBConnect();
         Connection conn = db.getConnection();
         
-        String sql = "SELECT pbh.MaPhieu, sp.SerialNumber, md.TenSanPham, pbh.NgayTiepNhan, pbh.LoiBaoCao, pbh.TrangThai " +
-                     "FROM phieubaohanh pbh " +
-                     "JOIN sanphamdaban sp ON pbh.MaSPDaBan = sp.MaSPDaBan " +
-                     "JOIN sanphammodel md ON sp.MaModel = md.MaModel " +
-                     "ORDER BY pbh.MaPhieu DESC";
+        // SQL đã sửa để lấy Tên Khách Hàng
+        String sql = "SELECT p.MaPhieu, k.TenKhachHang, m.TenSanPham, p.NgayTiepNhan, p.TrangThai, p.LoiBaoCao " +
+                     "FROM phieubaohanh p " +
+                     "JOIN sanphamdaban s ON p.MaSPDaBan = s.MaSPDaBan " +
+                     "JOIN sanphammodel m ON s.MaModel = m.MaModel " +
+                     "JOIN hoadon h ON s.MaHoaDon = h.MaHoaDon " +
+                     "JOIN khachhang k ON h.MaKhachHang = k.MaKhachHang " +
+                     "ORDER BY p.MaPhieu DESC";
         try {
             if (conn != null) {
                 PreparedStatement ps = conn.prepareStatement(sql);
@@ -72,13 +86,49 @@ public class PhieuBaoHanhDAO {
                 while(rs.next()){
                     Object[] row = {
                         rs.getInt("MaPhieu"),
-                        rs.getString("SerialNumber"),
+                        rs.getString("TenKhachHang"), // Đã có tên khách
                         rs.getString("TenSanPham"),
+                        rs.getDate("NgayTiepNhan"),
+                        rs.getString("TrangThai"),
+                        rs.getString("LoiBaoCao")    // Lấy thêm lỗi để hiển thị chi tiết nếu cần
+                    };
+                    list.add(row);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            db.close();
+        }
+        return list;
+    }
+
+    /**
+     * [MỚI] Tra cứu lịch sử bảo hành của một thiết bị
+     * Dùng cho Kỹ thuật viên xem máy này đã từng sửa gì chưa
+     */
+    public List<Object[]> layLichSuBaoHanhTheoSerial(String serial) {
+        List<Object[]> list = new ArrayList<>();
+        DBConnect db = new DBConnect();
+        Connection conn = db.getConnection();
+        
+        String sql = "SELECT p.MaPhieu, p.NgayTiepNhan, p.LoiBaoCao, p.TrangThai " +
+                     "FROM phieubaohanh p " +
+                     "JOIN sanphamdaban s ON p.MaSPDaBan = s.MaSPDaBan " +
+                     "WHERE s.SerialNumber = ? " +
+                     "ORDER BY p.NgayTiepNhan DESC";
+        try {
+            if (conn != null) {
+                PreparedStatement ps = conn.prepareStatement(sql);
+                ps.setString(1, serial);
+                ResultSet rs = ps.executeQuery();
+                while(rs.next()){
+                    list.add(new Object[]{
+                        rs.getInt("MaPhieu"),
                         rs.getDate("NgayTiepNhan"),
                         rs.getString("LoiBaoCao"),
                         rs.getString("TrangThai")
-                    };
-                    list.add(row);
+                    });
                 }
             }
         } catch (SQLException e) {

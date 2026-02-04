@@ -87,4 +87,9 @@ public class NghiepVuBaoHanhBUS {
     public List<LichSuXuLy> xemLichSuSuaChua(int maPhieu) {
         return lichSuDAO.layLichSuTheoPhieu(maPhieu);
     }
+    
+    //Hàm lấy danh sách các phiếu bảo hành cũ của một thiết bị
+    public List<Object[]> layLichSuThietBi(String serial) {
+        return phieuDAO.layLichSuBaoHanhTheoSerial(serial);
+    }
 }

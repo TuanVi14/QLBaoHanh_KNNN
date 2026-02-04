@@ -1,4 +1,4 @@
-package Interface;
+package Interface.nhanvien;
 
 import Process.NghiepVuBaoHanhBUS;
 import Process.PhieuBaoHanh;
@@ -127,7 +127,7 @@ public class PanelTiepNhan extends JPanel {
     }
 
     private void ganSuKien() {
-        // Sự kiện nút Kiểm Tra
+        // 1. Sự kiện nút bấm (Click chuột)
         btnKiemTra.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -135,7 +135,16 @@ public class PanelTiepNhan extends JPanel {
             }
         });
 
-        // Sự kiện nút Tạo Phiếu
+        // 2. [BỔ SUNG] Sự kiện phím ENTER trên ô nhập Serial
+        // Giúp nhân viên không cần cầm chuột bấm nút
+        txtSerial.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                btnKiemTra.doClick(); // Giả lập bấm nút Kiểm tra
+            }
+        });
+
+        // 3. Sự kiện nút Tạo Phiếu
         btnTaoPhieu.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -143,7 +152,6 @@ public class PanelTiepNhan extends JPanel {
             }
         });
     }
-
     // --- LOGIC XỬ LÝ ---
 
     private void xuLyKiemTra() {
