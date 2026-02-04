@@ -137,7 +137,7 @@ public class pnlNhanVien extends JPanel {
         		cothem = true;
         	}
         });
-        btnThem.setBounds(46, 163, 89, 23);
+        btnThem.setBounds(22, 163, 89, 23);
         add(btnThem);
         
         btnXoa = new JButton("Xóa");
@@ -164,7 +164,7 @@ public class pnlNhanVien extends JPanel {
 		        }
         	}
         });
-        btnXoa.setBounds(159, 163, 89, 23);
+        btnXoa.setBounds(130, 163, 89, 23);
         add(btnXoa);
         
         btnSua = new JButton("Sửa");
@@ -180,7 +180,7 @@ public class pnlNhanVien extends JPanel {
 		        }
         	}
         });
-        btnSua.setBounds(275, 163, 89, 23);
+        btnSua.setBounds(243, 163, 89, 23);
         add(btnSua);
         
         btnLuu = new JButton("Lưu");
@@ -211,7 +211,7 @@ public class pnlNhanVien extends JPanel {
 		            setKhoa(true); 
         	}
         });
-        btnLuu.setBounds(388, 163, 89, 23);
+        btnLuu.setBounds(358, 163, 89, 23);
         add(btnLuu);
         
         btnKluu = new JButton("K.Lưu");
@@ -221,7 +221,7 @@ public class pnlNhanVien extends JPanel {
         		setNull();
         	}
         });
-        btnKluu.setBounds(496, 163, 89, 23);
+        btnKluu.setBounds(466, 163, 89, 23);
         add(btnKluu);
         
         JScrollPane scrollPane = new JScrollPane();
@@ -262,6 +262,21 @@ public class pnlNhanVien extends JPanel {
         setKhoa(true);
         ShowData();
         txtTenVT.setEnabled(false);
+        
+        JButton btnEditVt = new JButton("Edit VT");
+        btnEditVt.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		try {
+					new jfVaiTro().setVisible(true);
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+        	}
+        });
+        btnEditVt.setEnabled(true);
+        btnEditVt.setBounds(570, 163, 89, 23);
+        add(btnEditVt);
 	}
 	/* ===== HÀM XỬ LÝ SỰ KIỆN ===== */
 	private void setKhoa(boolean a) {

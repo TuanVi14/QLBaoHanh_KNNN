@@ -19,7 +19,7 @@ public class LoaiSP {
        return cn.LoadData(sql); 
     } 
   
-    public ResultSet ShowNVTheoten(String ten) throws SQLException{    
+    public ResultSet ShowLoaiTheoten(String ten) throws SQLException{    
        String sql = "SELECT *  FROM loaisanpham where  TenLoai like '%" + ten + "%'";         
        return cn.LoadData(sql); 
     } 
@@ -35,14 +35,14 @@ public class LoaiSP {
     //Dieu chinh 1 dong du lieu vao table Sanpham 
     public void EditLoaiSP(int ma, String ten) throws SQLException {    
         String sql =
-            "UPDATE nhanvien " +
+            "UPDATE loaisanpham " +
             "SET TenLoai='" + ten +
-            " WHERE MaNhanVien=" + ma;
+            " WHERE MaLoai=" + ma;
 
         cn.UpdateData(sql);
     } 
     //Xoa 1 dong du lieu vao table Sanpham 
-    public void DeleteNhanVien(String ma) throws SQLException{    
+    public void DeleteLoaiSP(String ma) throws SQLException{    
        String sql = "Delete from loaisanpham where MaLoai='" + ma +"'";         
        cn.UpdateData(sql); 
     }

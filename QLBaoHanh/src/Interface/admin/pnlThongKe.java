@@ -1,210 +1,164 @@
 package Interface.admin;
 
-import Process.ExcelExport;
+import java.awt.*;
+import java.sql.ResultSet;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.sql.*;
-import java.text.SimpleDateFormat;
+import Process.ThongKe;
 
-/**
- * Panel Thống Kê với nút xuất Excel
- */
 public class pnlThongKe extends JPanel {
-    
-    private JTable tblDanhSach;
-    private DefaultTableModel tableModel;
-    private JLabel lblTongPhieu, lblDangXuLy, lblHoanThanh;
-    private JButton btnXuatExcel;
-    
+
+    private ThongKe tk = new ThongKe();
+
+    private JTextField txtTuNgay, txtDenNgay;
+    private JLabel lblHomNay, lblTuanNay, lblThangNay, lblTyLe;
+    private JTable tblThongKe;
+    private DefaultTableModel model;
+
     public pnlThongKe() {
-        initComponents();
-        loadDuLieu();
+        setLayout(null);
+        setBackground(new Color(240, 240, 240));
+
+        // ===== TIÊU ĐỀ =====
+        JLabel lblTitle = new JLabel("BÁO CÁO & THỐNG KÊ");
+        lblTitle.setFont(new Font("Tahoma", Font.BOLD, 18));
+        lblTitle.setBounds(20, 15, 300, 30);
+        add(lblTitle);
+
+        // ===== THỐNG KÊ THEO THỜI GIAN =====
+        JPanel pnlTime = new JPanel(null);
+        pnlTime.setBounds(20, 60, 300, 150);
+        pnlTime.setBorder(BorderFactory.createTitledBorder("THỐNG KÊ THEO THỜI GIAN"));
+        add(pnlTime);
+
+        pnlTime.add(new JLabel("Từ ngày:")).setBounds(15, 30, 70, 25);
+        txtTuNgay = new JTextField("2025-01-01");
+        txtTuNgay.setBounds(90, 30, 190, 25);
+        pnlTime.add(txtTuNgay);
+
+        pnlTime.add(new JLabel("Đến ngày:")).setBounds(15, 65, 70, 25);
+        txtDenNgay = new JTextField("2025-12-31");
+        txtDenNgay.setBounds(90, 65, 190, 25);
+        pnlTime.add(txtDenNgay);
+
+        JButton btnThongKe = new JButton("Thống kê");
+        btnThongKe.setBounds(90, 105, 120, 30);
+        pnlTime.add(btnThongKe);
+
+        // ===== THỐNG KÊ NHANH =====
+        JPanel pnlNhanh = new JPanel(null);
+        pnlNhanh.setBounds(340, 60, 310, 150);
+        pnlNhanh.setBorder(BorderFactory.createTitledBorder("THỐNG KÊ NHANH"));
+        add(pnlNhanh);
+
+        pnlNhanh.add(new JLabel("Bảo hành hôm nay:")).setBounds(15, 30, 150, 20);
+        lblHomNay = new JLabel("0 phiếu");
+        lblHomNay.setBounds(170, 30, 120, 20);
+        pnlNhanh.add(lblHomNay);
+
+        pnlNhanh.add(new JLabel("Bảo hành tuần này:")).setBounds(15, 60, 150, 20);
+        lblTuanNay = new JLabel("0 phiếu");
+        lblTuanNay.setBounds(170, 60, 120, 20);
+        pnlNhanh.add(lblTuanNay);
+
+        pnlNhanh.add(new JLabel("Bảo hành tháng này:")).setBounds(15, 90, 150, 20);
+        lblThangNay = new JLabel("0 phiếu");
+        lblThangNay.setBounds(170, 90, 120, 20);
+        pnlNhanh.add(lblThangNay);
+
+        pnlNhanh.add(new JLabel("Tỷ lệ hoàn thành:")).setBounds(15, 120, 150, 20);
+        lblTyLe = new JLabel("0%");
+        lblTyLe.setBounds(170, 120, 120, 20);
+        pnlNhanh.add(lblTyLe);
+
+        // ===== BẢNG CHI TIẾT =====
+        JPanel pnlTable = new JPanel(new BorderLayout());
+        pnlTable.setBounds(20, 225, 630, 200);
+        pnlTable.setBorder(BorderFactory.createTitledBorder("CHI TIẾT THỐNG KÊ"));
+        add(pnlTable);
+
+        model = new DefaultTableModel(
+            new String[]{"Loại SP", "Tổng BH", "Đang xử lý", "Hoàn thành", "Tỷ lệ"}, 0
+        );
+        tblThongKe = new JTable(model);
+        pnlTable.add(new JScrollPane(tblThongKe), BorderLayout.CENTER);
+
+        // ===== LOAD BAN ĐẦU =====
+        loadThongKeNhanh();
+        loadThongKeLoaiSP();
+
+        // ===== SỰ KIỆN =====
+        btnThongKe.addActionListener(e -> loadThongKeTheoThoiGian());
     }
-    
-    private void initComponents() {
-        setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        // Panel điều khiển phía trên
-        JPanel pnlTop = taoPanelTop();
-        add(pnlTop, BorderLayout.NORTH);
-        
-        // Panel thống kê giữa
-        JPanel pnlThongKe = taoPanelThongKe();
-        add(pnlThongKe, BorderLayout.CENTER);
-        
-        // Bảng danh sách
-        JPanel pnlBang = taoPanelBang();
-        add(pnlBang, BorderLayout.SOUTH);
-    }
-    
-    private JPanel taoPanelTop() {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 10));
-        panel.setBackground(new Color(52, 152, 219));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        
-        JLabel lblTieuDe = new JLabel("THỐNG KÊ BÁO CÁO");
-        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 20));
-        lblTieuDe.setForeground(Color.WHITE);
-        panel.add(lblTieuDe);
-        
-        panel.add(Box.createHorizontalStrut(300));
-        
-        // Nút Xuất Excel
-        btnXuatExcel = new JButton("📊 Xuất Excel");
-        btnXuatExcel.setFont(new Font("Arial", Font.BOLD, 14));
-        btnXuatExcel.setBackground(new Color(46, 204, 113));
-        btnXuatExcel.setForeground(Color.WHITE);
-        btnXuatExcel.setFocusPainted(false);
-        btnXuatExcel.setBorderPainted(false);
-        btnXuatExcel.setPreferredSize(new Dimension(150, 40));
-        btnXuatExcel.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnXuatExcel.addActionListener(e -> xuatExcel());
-        panel.add(btnXuatExcel);
-        
-        return panel;
-    }
-    
-    private JPanel taoPanelThongKe() {
-        JPanel panel = new JPanel(new GridLayout(1, 3, 20, 0));
-        panel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
-        
-        lblTongPhieu = new JLabel("0", SwingConstants.CENTER);
-        panel.add(taoCard("Tổng Số Phiếu", lblTongPhieu, new Color(52, 152, 219)));
-        
-        lblDangXuLy = new JLabel("0", SwingConstants.CENTER);
-        panel.add(taoCard("Đang Xử Lý", lblDangXuLy, new Color(241, 196, 15)));
-        
-        lblHoanThanh = new JLabel("0", SwingConstants.CENTER);
-        panel.add(taoCard("Hoàn Thành", lblHoanThanh, new Color(46, 204, 113)));
-        
-        return panel;
-    }
-    
-    private JPanel taoCard(String tieuDe, JLabel lblGiaTri, Color mau) {
-        JPanel card = new JPanel(new BorderLayout(5, 5));
-        card.setBackground(mau);
-        card.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(mau.darker(), 2),
-            BorderFactory.createEmptyBorder(20, 15, 20, 15)
-        ));
-        
-        JLabel lblTieuDe = new JLabel(tieuDe, SwingConstants.CENTER);
-        lblTieuDe.setFont(new Font("Arial", Font.BOLD, 16));
-        lblTieuDe.setForeground(Color.WHITE);
-        
-        lblGiaTri.setFont(new Font("Arial", Font.BOLD, 36));
-        lblGiaTri.setForeground(Color.WHITE);
-        
-        card.add(lblTieuDe, BorderLayout.NORTH);
-        card.add(lblGiaTri, BorderLayout.CENTER);
-        
-        return card;
-    }
-    
-    private JPanel taoPanelBang() {
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createLineBorder(new Color(52, 152, 219), 2),
-            "Danh Sách Phiếu Bảo Hành",
-            0, 0,
-            new Font("Arial", Font.BOLD, 14),
-            new Color(52, 152, 219)
-        ));
-        panel.setPreferredSize(new Dimension(0, 300));
-        
-        String[] cot = {"Mã Phiếu", "Khách Hàng", "Sản Phẩm", "Ngày Tiếp Nhận", "Trạng Thái"};
-        tableModel = new DefaultTableModel(cot, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
-        
-        tblDanhSach = new JTable(tableModel);
-        tblDanhSach.setFont(new Font("Arial", Font.PLAIN, 13));
-        tblDanhSach.setRowHeight(25);
-        tblDanhSach.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
-        tblDanhSach.getTableHeader().setBackground(new Color(52, 152, 219));
-        tblDanhSach.getTableHeader().setForeground(Color.WHITE);
-        
-        JScrollPane scrollPane = new JScrollPane(tblDanhSach);
-        panel.add(scrollPane, BorderLayout.CENTER);
-        
-        return panel;
-    }
-    
-    /**
-     * Load dữ liệu thống kê
-     */
-    public void loadDuLieu() {
+
+    // ================= LOAD THỐNG KÊ NHANH =================
+    private void loadThongKeNhanh() {
         try {
-            // Tổng số phiếu
-            Statement stmt = conn.createStatement();
-            ResultSet rs = stmt.executeQuery("SELECT COUNT(*) as total FROM phieubaohanh");
-            if (rs.next()) {
-                lblTongPhieu.setText(String.valueOf(rs.getInt("total")));
-            }
-            
-            // Đang xử lý
-            rs = stmt.executeQuery("SELECT COUNT(*) as total FROM phieubaohanh WHERE TrangThai = 'Đang sửa'");
-            if (rs.next()) {
-                lblDangXuLy.setText(String.valueOf(rs.getInt("total")));
-            }
-            
-            // Hoàn thành
-            rs = stmt.executeQuery("SELECT COUNT(*) as total FROM phieubaohanh WHERE TrangThai = 'Hoàn thành'");
-            if (rs.next()) {
-                lblHoanThanh.setText(String.valueOf(rs.getInt("total")));
-            }
-            
-            // Load bảng
-            tableModel.setRowCount(0);
-            String sql = "SELECT p.MaPhieu, k.TenKhachHang, m.TenSanPham, p.NgayTiepNhan, p.TrangThai " +
-                        "FROM phieubaohanh p " +
-                        "JOIN sanphamdaban s ON p.MaSPDaBan = s.MaSPDaBan " +
-                        "JOIN sanphammodel m ON s.MaModel = m.MaModel " +
-                        "JOIN hoadon h ON s.MaHoaDon = h.MaHoaDon " +
-                        "JOIN khachhang k ON h.MaKhachHang = k.MaKhachHang " +
-                        "ORDER BY p.NgayTiepNhan DESC LIMIT 50";
-            
-            rs = stmt.executeQuery(sql);
+            lblHomNay.setText(tk.ThongKeHomNay() + " phiếu");
+            lblTuanNay.setText(tk.ThongKeTuanNay() + " phiếu");
+            lblThangNay.setText(tk.ThongKeThangNay() + " phiếu");
+            lblTyLe.setText(String.format("%.0f%%", tk.TyLeHoanThanh()));
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi load thống kê nhanh");
+        }
+    }
+
+    // ================= THEO LOẠI SP =================
+    private void loadThongKeLoaiSP() {
+        model.setRowCount(0);
+        model.setColumnIdentifiers(new String[]{
+            "Loại SP", "Tổng BH", "Đang xử lý", "Hoàn thành", "Tỷ lệ"
+        });
+
+        try {
+            ResultSet rs = tk.ThongKeTheoLoaiSP();
             while (rs.next()) {
-                tableModel.addRow(new Object[]{
+                int tong = rs.getInt("TongBH");
+                int hoanThanh = rs.getInt("HoanThanh");
+                String tyLe = tong == 0 ? "0%" :
+                        Math.round(hoanThanh * 100.0 / tong) + "%";
+
+                model.addRow(new Object[]{
+                    rs.getString("TenLoai"),
+                    tong,
+                    rs.getInt("DangXuLy"),
+                    hoanThanh,
+                    tyLe
+                });
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(this, "Lỗi thống kê theo loại SP");
+        }
+    }
+
+    // ================= THEO THỜI GIAN =================
+    private void loadThongKeTheoThoiGian() {
+        model.setRowCount(0);
+        model.setColumnIdentifiers(new String[]{
+            "Mã phiếu", "Sản phẩm", "Khách hàng", "Ngày tiếp nhận", "Trạng thái"
+        });
+
+        try {
+            ResultSet rs = tk.ThongKeTheoThoiGian(
+                txtTuNgay.getText(),
+                txtDenNgay.getText()
+            );
+
+            while (rs.next()) {
+                model.addRow(new Object[]{
                     rs.getInt("MaPhieu"),
-                    rs.getString("TenKhachHang"),
                     rs.getString("TenSanPham"),
-                    new SimpleDateFormat("dd/MM/yyyy").format(rs.getDate("NgayTiepNhan")),
+                    rs.getString("TenKhachHang"),
+                    rs.getDate("NgayTiepNhan"),
                     rs.getString("TrangThai")
                 });
             }
-            
-            rs.close();
-            stmt.close();
-            
-        } catch (SQLException e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                "Lỗi khi tải dữ liệu: " + e.getMessage(),
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
-        }
-    }
-    
-    /**
-     * Xuất Excel
-     */
-    private void xuatExcel() {
-        try {
-            ExcelExport excelExport = new ExcelExport(conn);
-            excelExport.xuatExcel((JFrame) SwingUtilities.getWindowAncestor(this));
+
+            if (model.getRowCount() == 0) {
+                JOptionPane.showMessageDialog(this, "Không có dữ liệu trong khoảng thời gian này");
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                "Lỗi khi xuất Excel: " + e.getMessage(),
-                "Lỗi",
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Lỗi thống kê theo thời gian");
         }
     }
 }
